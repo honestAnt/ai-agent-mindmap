@@ -1,12 +1,14 @@
 # AI Agent 学习图谱
 
+在线阅读：<https://honestant.github.io/ai-agent-mindmap/>
+
 把《深入理解 AI Agent：设计原理与工程实践》（[bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book)）中文正文 `book/` 整理成可复习的知识结构。其他语言译本未纳入。
 
 这是学习笔记，不是原书替代。中文正文已复制在 [`book/`](book/)（引言、第 1–10 章、后记、思考题参考答案和配图），来自 [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book) 的 `book/`，许可证 Apache-2.0，作者李博杰。脑图和卡片里的「原文」链到这里的对应小节。
 
 ## 怎么用
 
-用浏览器打开 [`index.html`](index.html)（双击即可，不需要服务器）。页面里有：
+打开 [在线阅读](https://honestant.github.io/ai-agent-mindmap/)。页面里有：
 
 | 页 | 内容 |
 | --- | --- |
@@ -96,7 +98,7 @@
 
 ## 许可证
 
-`book/` 里的中文正文、配图和思考题参考答案来自 [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book)，版权归李博杰（Bojie Li，Copyright 2025），许可证为 [Apache License 2.0](LICENSE)。本仓库的学习整理（`index.html`、`docs/`、`images/`）也按 Apache-2.0 提供。原书部分子项目若另有许可证，以原仓库说明为准；这里只复制了中文 `book/`。
+`book/` 里的中文正文、配图和思考题参考答案来自 [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book)，版权归李博杰（Bojie Li，Copyright 2025），许可证为 [Apache License 2.0](LICENSE)。本仓库的学习整理（页面、`docs/`、`images/`）也按 Apache-2.0 提供。原书部分子项目若另有许可证，以原仓库说明为准；这里只复制了中文 `book/`。
 
 ## 免责声明
 
