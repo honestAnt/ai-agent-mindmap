@@ -48,6 +48,35 @@
     padding: 8px 10px; border-radius: 8px; color: var(--muted);
   }
   nav button[aria-current="page"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .nav-label { font-size: 11px; letter-spacing: 0.08em; color: var(--gold); padding: 10px 10px 2px; }
+  .nav-label:first-child { padding-top: 0; }
+  .hero { margin-bottom: 16px; }
+  .hero .eq { font-family: var(--serif); font-size: 26px; line-height: 1.35; margin: 0 0 6px; }
+  .hero p { margin: 6px 0 0; }
+  .trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  .trio .panel { padding: 14px 16px; }
+  .trio strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .trio .k { margin-bottom: 2px; }
+  .trio p { margin: 0; font-size: 14px; }
+  ol.steps { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
+  ol.steps li { display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  ol.steps li:last-child { border-bottom: 0; }
+  .act { font-size: 12px; border-radius: 6px; padding: 1px 6px; text-align: center; background: var(--accent-soft); color: var(--accent); }
+  .act.do { background: var(--teal-soft); color: var(--teal); }
+  .act.see { background: #efe6d2; color: var(--gold); }
+  .act.ask { background: #ece7f3; color: #5b4b7a; }
+  .note { margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .path { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .path .panel { display: flex; flex-direction: column; gap: 6px; }
+  .path .num { font-family: var(--serif); font-size: 24px; color: var(--accent); line-height: 1; }
+  .go { text-decoration: none; align-self: flex-start; margin-top: auto; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: 999px; padding: 4px 12px; font-size: 13px; }
+  details.later { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px 20px; }
+  details.later summary { cursor: pointer; font-family: var(--serif); font-size: 18px; }
+  details.later[open] summary { margin-bottom: 10px; }
+  .basic .ex { margin-top: 8px; padding: 8px 10px; background: var(--teal-soft); border-radius: 8px; font-size: 14px; }
+  .basic .ex strong { color: var(--teal); }
+  .basic a.src { font-size: 12px; color: var(--muted); }
+  .graph-tools { display: flex; gap: 8px; margin-bottom: 12px; }
   .side-note { margin-top: auto; font-size: 12px; color: var(--muted); }
   .side-note p { margin: 8px 0 0; }
   main { padding: 28px 36px 64px; max-width: 1180px; min-width: 0; }
@@ -105,7 +134,7 @@
   .knode {
     display: inline-flex; align-items: center; gap: 8px; flex: none;
     background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-    padding: 7px 8px 7px 12px; max-width: 240px;
+    padding: 7px 8px 7px 12px; max-width: 290px;
   }
   .kbody { min-width: 0; }
   .ktitle {
@@ -171,6 +200,7 @@ a.src { margin-top: 10px; }
   svg.graph .n.core rect { fill: #1c1915; stroke: #1c1915; }
   svg.graph .n.core text { fill: #f6f1e7; }
   svg.graph .n.on rect { fill: #f3e4d8; stroke: #9a3412; }
+  svg.graph .n.core.on rect { fill: #1c1915; stroke: #c2410c; stroke-width: 2.5; }
   svg.graph line.base { stroke: #c3b9a6; stroke-linecap: round; }
   svg.graph line.flow {
     stroke: #c2410c; stroke-width: 2; stroke-linecap: round;
@@ -245,7 +275,8 @@ a.src { margin-top: 10px; }
     .clips.collapsed h2, .clips.collapsed .clip-toggle { writing-mode: horizontal-tb; letter-spacing: 0; font-size: 16px; }
     nav { flex-direction: row; flex-wrap: wrap; }
     main { padding: 20px 16px 48px; }
-    header.top, .formula, .grid-2, .grid-3, .map-wrap { grid-template-columns: 1fr; display: grid; }
+    header.top, .formula, .grid-2, .grid-3, .map-wrap, .trio, .path { grid-template-columns: 1fr; display: grid; }
+    .nav-label { width: 100%; padding: 4px 10px 0; }
     .wing.right { text-align: left; }
     input[type="search"] { width: 100%; }
   }
@@ -256,10 +287,12 @@ a.src { margin-top: 10px; }
   <aside>
     <div class="brand">学习图谱<small>深入理解 AI Agent · 中文正文</small></div>
     <nav id="nav">
-      <button data-view="home">总览</button>
-      <button data-view="map">脑图</button>
+      <div class="nav-label">入门</div>
+      <button data-view="home">从这里开始</button>
+      <button data-view="cards">入门卡片</button>
+      <button data-view="map">十章地图</button>
+      <div class="nav-label">学过一遍再看</div>
       <button data-view="graph">图谱</button>
-      <button data-view="cards">卡片</button>
       <button data-view="chapters">精要</button>
       <button data-view="interview">面试</button>
     </nav>
@@ -271,8 +304,8 @@ a.src { margin-top: 10px; }
   <main>
     <header class="top">
       <div>
-        <h1 id="title">总览</h1>
-        <p class="lede" id="lede">先记住公式，再按构建和提升两条线往下走。</p>
+        <h1 id="title">从这里开始</h1>
+        <p class="lede" id="lede">第一次学 Agent，先看这一页。</p>
       </div>
       <input id="q" type="search" placeholder="搜索概念、卡片、面试题" />
     </header>
@@ -310,10 +343,10 @@ a.src { margin-top: 10px; }
 </div>
 <script>
 const VIEWS = {
-  home: ["总览", "先记住公式，再按构建和提升两条线往下走。"],
-  map: ["脑图", "同一级上下对齐，下一级在右侧展开。点圆点收起，数字是下一级的数量。"],
-  graph: ["图谱", "点一个概念，看它和谁相连。关系比名词重要。"],
-  cards: ["知识卡片", "一张卡片只留一个设计判断。"],
+  home: ["从这里开始", "第一次学 Agent，先看这一页。"],
+  map: ["十章地图", "先看十章各讲什么，想细看再点开。圆点里的数字是下一层有几项。"],
+  graph: ["图谱", "先看最基础的几个概念，点一个看它和谁相连。"],
+  cards: ["入门卡片", "每张先讲人话，再给一个例子。学完入门再看各章。"],
   chapters: ["章节精要", "每章记住什么，以及它在全书里的位置。"],
   interview: ["面试重点", "先给判断，再给结构，最后用一个例子收住。"]
 };
@@ -391,6 +424,23 @@ const CHAPTERS = [
   ]}
 ];
 
+const BASICS = [
+  ["Agent 是什么", "会自己一步步把事做完的 AI：先想，动手，看结果，再接着做。", "让 Cursor 改代码，它会搜代码、改文件、跑测试，直到测试通过。", "只回一段话不算 Agent；能动手、看结果、再接着做才算。", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
+  ["大脑：大模型", "负责想下一步做什么。", "订机票时判断：先搜航班，还是先让用户登录。", "大脑再聪明，看不到的信息也用不上。", "chapter1", "LLM：Agent 的大脑"],
+  ["眼睛：上下文", "模型这一轮能看到的全部文字：规则说明、工具清单、聊天记录、工具返回的结果。", "你说过「不要转机」，这句话得在上下文里，它才会照做。", "模型不记得上一轮。每次调用都要把需要的材料重新交给它。", "chapter2", "带工具调用的多轮交互：Agent 的核心循环"],
+  ["手脚：工具", "让 Agent 去查东西、改东西的接口。", "查航班是「看」，付款是「改世界」。", "查的工具要控制给回多少信息，改的工具要控制风险。", "chapter4", "工具的分类"],
+  ["环境：外面的世界", "Agent 外面真实存在的东西：网站、数据库、文件、用户。", "航司系统里的座位不属于 Agent，它只能通过工具去查、去订。", "工具是门，环境是门外的房间。", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
+  ["ReAct：想、做、看", "先想做什么，调用工具去做，看结果再想下一步，直到完成。", "算全年收入：先把欧元、英镑换成美元，看到结果，再相加。", "少了「看结果」这一步，它只能瞎猜。", "chapter1", "ReAct 循环"],
+  ["Harness：模型外面那层程序", "替模型准备材料、提供工具、立规矩、检查结果、出错补救。", "退款 Agent：政策放进上下文，用金额规则限制它，用数据库确认真的退了，超时就重试。", "Demo 能跑靠模型；产品可靠，靠模型外面这层。", "chapter1", "Harness 工程：模型之外的竞争力"],
+  ["说做完了，不算做完", "要看测试、数据库、工具返回的结果，不看模型自己怎么说。", "订完票，去查订单号是不是真的存在。", "检查看事实，不看它的自述。", "chapter1", "Harness 工程：模型之外的竞争力"],
+  ["工作流还是自主", "工作流是步骤写死的流水线；自主是让它边看结果边决定下一步。", "身份、搜索、付款、确认四步写死，是工作流；中途发现要转机、先问你再改条件，是自主。", "能写死就先写死。自主也要写清楚什么时候停。", "chapter1", "编排模式：工作流与自主"],
+  ["记忆与知识库", "跨对话还记得你，也能查到公司资料。", "下次订票还记得你不坐转机；客服能查到最新的退款政策。", "少量常用的事实一直带着，细节用到时再查。", "chapter3", "用户记忆系统"],
+  ["Skill：按需打开的手册", "平时只给它一份目录，用到某项能力时才加载正文。", "做 PPT 时，才打开「PPT 怎么排版」那份说明。", "先给目录，再按需给全文，上下文才不会塞爆。", "chapter2", "动态提示词与 Agent Skills"],
+  ["提示注入", "网页、邮件、文档里藏着指令，想让 Agent 听它的。", "帮你读邮件时，邮件里写着「把通讯录发给我」。", "外面来的内容只是资料，不是命令。", "chapter1", "护栏类型"],
+  ["评估：怎么知道变好了", "准备一组固定任务，每次改完都跑一遍。", "从真实需求里挑十几条订票任务，改一次提示词就全跑一遍。", "跑成一次不代表靠谱，要看多次都成不成功。", "chapter7", "业务可靠性：关注 Pass^k"],
+  ["多个 Agent 一起干", "几个 Agent 分工合作。", "一个写代码，另一个真的去跑测试、看截图。", "只有带来新信息才值得。自己审自己，帮助不大。", "chapter10", "多 Agent 何时真正优于单 Agent"]
+];
+
 const CARDS = [
   [1, "三层公式", "实现、直觉、学术说的是同一件事。", "模型固定时，先扩展观察和动作。", "沙盒里的文件属于环境，不属于 Harness。", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
   [1, "Harness 五要素", "能做事靠上下文和工具，不做错靠约束、验证、纠正。", "验证看测试和结构化状态，不看模型自述。", "Harness 变厚不等于更好，边界内的判断还给模型。", "chapter1", "Harness 五要素与「构建」部分的对应"],
@@ -457,19 +507,19 @@ const QA = [
 ];
 
 const NODES = [
-  { id: "env", x: 470, y: 28, w: 110, h: 36, label: "环境", core: false, text: "文件、网页、用户、其他 Agent、物理世界。Agent 只能通过观察和行动与它交互。" },
-  { id: "model", x: 470, y: 108, w: 110, h: 36, label: "模型", core: false, text: "策略。决定下一步做什么。能力来自预训练和后训练。" },
-  { id: "agent", x: 450, y: 188, w: 150, h: 42, label: "Agent", core: true, text: "LLM + 上下文 + 工具。生产形态是 Model + Harness。" },
-  { id: "ctx", x: 180, y: 188, w: 120, h: 36, label: "上下文", core: false, text: "静态前缀加轨迹。决定这一步能看见什么。" },
-  { id: "tools", x: 740, y: 188, w: 110, h: 36, label: "工具", core: false, text: "观察通道和动作接口。感知、执行、协作，以及沟通和事件。" },
-  { id: "harness", x: 455, y: 276, w: 140, h: 36, label: "Harness", core: false, text: "上下文、工具、约束、验证、纠正。位于模型之外、Agent 边界之内，不包含环境。" },
+  { id: "env", x: 470, y: 28, w: 110, h: 36, label: "环境", core: false, text: "Agent 外面的真实世界：网站、文件、数据库、用户、其他 Agent。Agent 只能通过工具去看、去改。" },
+  { id: "model", x: 470, y: 108, w: 110, h: 36, label: "模型", core: false, text: "大脑。想下一步做什么。本事来自预训练和后训练。" },
+  { id: "agent", x: 450, y: 188, w: 150, h: 42, label: "Agent", core: true, text: "大模型 + 上下文 + 工具，会自己一步步把事做完。上线时写成 Model + Harness。" },
+  { id: "ctx", x: 180, y: 188, w: 120, h: 36, label: "上下文", core: false, text: "眼睛。这一轮能看见的全部文字：规则说明、工具清单、聊天记录、工具结果。" },
+  { id: "tools", x: 740, y: 188, w: 110, h: 36, label: "工具", core: false, text: "手脚。去查东西、改东西的接口。" },
+  { id: "harness", x: 455, y: 276, w: 140, h: 36, label: "Harness", core: false, text: "模型外面那层程序：准备材料、提供工具、立规矩、检查结果、出错补救。不包括环境。" },
   { id: "skills", x: 40, y: 108, w: 110, h: 36, label: "Skills", core: false, text: "渐进披露。目录常驻，正文按需追加。" },
   { id: "memory", x: 40, y: 268, w: 110, h: 36, label: "记忆", core: false, text: "跨会话的个人事实。轨迹是流水账，档案会被改写。" },
   { id: "rag", x: 180, y: 348, w: 110, h: 36, label: "知识库", core: false, text: "共享知识。分块检索，或交给智能体化 RAG。" },
   { id: "code", x: 760, y: 108, w: 110, h: 36, label: "代码", core: false, text: "元能力。能创造工具，也继承测试和类型系统。" },
   { id: "act", x: 900, y: 188, w: 120, h: 36, label: "交互", core: false, text: "异步、语音、屏幕、机器人。共用五原语。" },
   { id: "guard", x: 740, y: 276, w: 110, h: 36, label: "护栏", core: false, text: "上下文层、执行层、数据层。" },
-  { id: "react", x: 470, y: 360, w: 110, h: 36, label: "ReAct", core: false, text: "想、做、看。模型决策，Harness 执行，环境给观察。" },
+  { id: "react", x: 470, y: 360, w: 110, h: 36, label: "ReAct", core: false, text: "想、做、看，一轮接一轮，直到做完。模型决定，Harness 执行，环境给结果。" },
   { id: "eval", x: 250, y: 450, w: 110, h: 36, label: "评估", core: false, text: "把表现变成可比较信号。Pass@k 对 Pass^k。" },
   { id: "train", x: 40, y: 450, w: 120, h: 36, label: "后训练", core: false, text: "底座、协议、策略。数据和环境先于算法。" },
   { id: "evo", x: 470, y: 450, w: 130, h: 36, label: "持续进化", core: false, text: "知识、指令、程序、参数。在线记录，离线发布。" },
@@ -484,11 +534,13 @@ const EDGES = [
 ];
 
 let view = "home";
-let chapterFilter = 0;
+let chapterFilter = -2;
+let graphAll = false;
+const GRAPH_BASIC = ["env", "model", "agent", "ctx", "tools", "harness", "react"];
 let openChapter = 1;
 let selectedNode = "agent";
 const openQa = new Set();
-const openTree = new Set(["root", "formula"]);
+const openTree = new Set(["root", "build", "lift"]);
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -526,31 +578,42 @@ function render() {
 
 function renderHome() {
   return `
-    <div class="formula">
-      <div class="panel">
-        <p class="eq">Agent = <em>LLM</em> + <em>上下文</em> + <em>工具</em></p>
-        <p>生产系统写成 Model + Harness。Harness 在模型之外、Agent 之内，不包含环境。</p>
-        <div class="chips">
-          <span class="chip active">大脑 · 策略</span>
-          <span class="chip active">眼睛 · 观察</span>
-          <span class="chip active">手脚 · 行动接口</span>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="k">30 分钟</div>
-        <ul class="clean">
-          <li>第 1 章：公式、ReAct、五要素</li>
-          <li>第 2 章：前缀不改，动态放末尾，走标准 API</li>
-          <li>其余章节都是这两句的展开</li>
-        </ul>
+    <div class="panel hero">
+      <p class="eq">Agent 是会自己一步步把事做完的 AI。</p>
+      <p>聊天机器人回你一段话就结束了。Agent 会去查、去做，看到结果再决定下一步，直到任务完成。原书把它写成一个公式：<strong>Agent = 大模型 + 上下文 + 工具</strong>。</p>
+      <div class="trio">
+        <div class="panel"><div class="k">大脑</div><strong>大模型</strong><p>想下一步做什么。</p></div>
+        <div class="panel"><div class="k">眼睛</div><strong>上下文</strong><p>这一轮它能看见的全部文字。</p></div>
+        <div class="panel"><div class="k">手脚</div><strong>工具</strong><p>去查东西、改东西的接口。</p></div>
       </div>
     </div>
-    <div class="grid-2">
-      <div class="panel"><div class="k">构建 · 第 1–6 章</div><h3>怎样造出一个 Agent</h3><p>上下文、记忆、工具、代码、交互。解决它这一次能看见什么、能做什么。</p></div>
-      <div class="panel"><div class="k">提升 · 第 7–10 章</div><h3>怎样知道它变好了</h3><p>评估、后训练、持续进化、多 Agent。没有第 7 章，后面三章分不清进步和退化。</p></div>
-    </div>
-    <h2>十条容易混的判断</h2>
+    <h2>看一个例子：「帮我订下周三去上海的机票」</h2>
     <div class="panel">
+      <ol class="steps">
+        <li><span class="act">想</span><span>先搜航班。</span></li>
+        <li><span class="act do">做</span><span>调用搜索工具，发现需要先登录。</span></li>
+        <li><span class="act do">做</span><span>先核实身份，再回来搜索。</span></li>
+        <li><span class="act see">看</span><span>最便宜的航班要转机。</span></li>
+        <li><span class="act ask">问</span><span>问你接不接受转机。你说不要。</span></li>
+        <li><span class="act">想</span><span>把「不要转机」加进搜索条件，重新搜。</span></li>
+      </ol>
+      <p class="note">每一步都在重复「想、做、看」，这个循环叫 ReAct。航司系统是<strong>环境</strong>，不属于 Agent；搜索和付款是<strong>工具</strong>；你说的「不要转机」要留在<strong>上下文</strong>里，它下一步才会照做。</p>
+      ${sourceLink("chapter1", "自主 Agent：动态自主决策")}
+    </div>
+    <h2>模型外面，还有一层程序</h2>
+    <div class="panel">
+      <p>光有模型还不够可靠。原书把模型外面那层程序叫 <strong>Harness</strong>：替它准备材料、提供工具、立规矩、检查结果、出错时补救。</p>
+      <p class="note">比如退款 Agent：退款政策放进上下文，用金额规则限制它能退多少，用数据库确认钱真的退了，超时就重试。它说「退好了」不算数，数据库里查得到才算。</p>
+      ${sourceLink("chapter1", "Harness 工程：模型之外的竞争力")}
+    </div>
+    <h2>入门三步</h2>
+    <div class="path">
+      <div class="panel"><span class="num">1</span><h3>分清这几个词</h3><p>大模型、上下文、工具、环境、Harness，各用一句话讲出来。</p><button type="button" class="go" data-go="cards">看入门卡片</button></div>
+      <div class="panel"><span class="num">2</span><h3>知道十章各讲什么</h3><p>前六章教你造一个 Agent，后四章教你让它变好。先看标题，不用点开细节。</p><button type="button" class="go" data-go="map">看十章地图</button></div>
+      <div class="panel"><span class="num">3</span><h3>回原书读第 1 章</h3><p>有了这些词再读原文，会顺很多。第 8 章讲训练模型，入门可以先跳过。</p><a class="go" href="book/chapter1.md">读第 1 章</a></div>
+    </div>
+    <details class="later">
+      <summary>学过一遍之后再看：十条容易混的说法</summary>
       <table>
         <thead><tr><th>不要混</th><th>分开记</th></tr></thead>
         <tbody>
@@ -566,11 +629,13 @@ function renderHome() {
           <tr><td>共享上下文 / 隔离</td><td>继承全部轨迹，对只传递移交包</td></tr>
         </tbody>
       </table>
-    </div>
-    <h2>临考前十句</h2>
+    </details>
+    <details class="later">
+      <summary>准备面试时再看：临考前十句</summary>
     <div class="grid-2">
       ${["Agent = LLM + 上下文 + 工具；环境在边界外。","Harness = 上下文 + 工具 + 约束 + 验证 + 纠正。","上下文 = 静态前缀 + 只追加的轨迹。","前缀不改，动态信息放末尾。","验证看结构化事实，不看模型自述。","Pass@k 看上限，Pass^k 看可靠性。","底座用 Mid-training，协议用 SFT，策略用 RL。","进化四载体：知识、指令、程序、参数。","多 Agent 的价值等于新信息减去额外成本。","模型会逐层吃掉 Harness，但吃不完。"].map(t => `<div class="panel">${esc(t)}</div>`).join("")}
-    </div>`;
+    </div>
+    </details>`;
 }
 
 function twig(title, file, heading) { return { title, file, heading }; }
@@ -578,7 +643,7 @@ function limb(id, title, children, extra) { return Object.assign({ id, title, ch
 const TREE = {
   id: "root",
   title: "Agent = LLM + 上下文 + 工具",
-  note: "环境在边界外",
+  note: "大脑 + 眼睛 + 手脚",
   file: "chapter1",
   heading: "现代 Agent = LLM + 上下文 + 工具",
   children: [
@@ -599,7 +664,7 @@ const TREE = {
         twig("更新：当场适应、外部产物、参数", "chapter1", "Agent 的学习机制：从上下文适应到持久更新"),
         twig("模型会一层一层吃掉适配层", "afterword", "模型与 Agent 的共同演进 {.unnumbered}")
       ])
-    ], { note: "先记住这一层", file: "chapter1", heading: "现代 Agent = LLM + 上下文 + 工具" }),
+    ], { note: "公式拆开看", file: "chapter1", heading: "现代 Agent = LLM + 上下文 + 工具" }),
     limb("build", "构建", [
       limb("ch1", "1 入门", [
         limb("ch1-gap", "从哪做起", [
@@ -610,7 +675,7 @@ const TREE = {
           twig("工作流路径固定，必须有停止条件", "chapter1", "编排模式：工作流与自主"),
           twig("模型一层一层吃掉适配层", "afterword", "模型与 Agent 的共同演进 {.unnumbered}")
         ])
-      ], { note: "公式、ReAct、Harness", file: "chapter1", ch: 1, part: "构建" }),
+      ], { note: "Agent 由什么组成，怎样一步步做事", file: "chapter1", ch: 1, part: "构建" }),
       limb("ch2", "2 上下文", [
         limb("ch2-limit", "上限", [
           twig("上下文质量决定上限", "chapter2", "上下文：决定 Agent 能力上限的关键"),
@@ -627,7 +692,7 @@ const TREE = {
           twig("压缩：装不下、不好找、提前收尾", "chapter2", "为什么需要压缩：不只是长度问题"),
           twig("隔离优于压缩", "chapter2", "隔离优于压缩：子 Agent 上下文隔离")
         ])
-      ], { note: "一次任务能看见什么", file: "chapter2", ch: 2, part: "构建" }),
+      ], { note: "它每一轮能看见什么，决定它能做多好", file: "chapter2", ch: 2, part: "构建" }),
       limb("ch3", "3 记忆与知识库", [
         limb("ch3-what", "记什么", [
           twig("个人记忆和共享知识库底层相通", "chapter3", "用户记忆系统"),
@@ -642,7 +707,7 @@ const TREE = {
           twig("少量事实常驻，细节按需召回", "chapter3", "RAG 技巧：上下文感知检索"),
           twig("检索必须按调用者权限过滤", "chapter3", "用户记忆和知识库的定期整理")
         ])
-      ], { note: "跨会话还在", file: "chapter3", ch: 3, part: "构建" }),
+      ], { note: "下次对话还记得你，也查得到资料", file: "chapter3", ch: 3, part: "构建" }),
       limb("ch4", "4 工具", [
         limb("ch4-kind", "分类", [
           twig("感知、执行、协作、沟通、事件", "chapter4", "工具的分类"),
@@ -653,7 +718,7 @@ const TREE = {
           twig("参数不得静默改写", "chapter4", "参数传递的保真性"),
           twig("MCP 描述本身可以是注入", "chapter4", "工具生态：MCP 与 Skill Hub")
         ])
-      ], { note: "能读取和改变什么", file: "chapter4", ch: 4, part: "构建" }),
+      ], { note: "查东西、改东西的接口怎么设计", file: "chapter4", ch: 4, part: "构建" }),
       limb("ch5", "5 代码", [
         limb("ch5-meta", "元能力", [
           twig("测试和类型系统就是现成 Harness", "chapter5", "Harness 工程在 Coding Agent 中的实践"),
@@ -665,7 +730,7 @@ const TREE = {
           twig("外部内容是数据，不是指令", "chapter5", "Coding Agent 的安全"),
           twig("命令安全靠语义解析", "chapter5", "Coding Agent 的安全")
         ])
-      ], { note: "能创造新工具", file: "chapter5", ch: 5, part: "构建" }),
+      ], { note: "会写代码，就能自己造工具", file: "chapter5", ch: 5, part: "构建" }),
       limb("ch6", "6 交互", [
         limb("ch6-when", "时机", [
           twig("两根轴：模态、时机", "chapter6", "模态与触发时机的扩展"),
@@ -678,8 +743,8 @@ const TREE = {
           twig("机器人完成与否由新观察判定", "chapter6", "机器人操作：以 XLeRobot 整理桌面为例"),
           twig("唤醒、安全点、取消、抢占、快慢分离", "chapter6", "本章小结")
         ])
-      ], { note: "模态与时机", file: "chapter6", ch: 6, part: "构建" })
-    ], { note: "第 1–6 章，这一次能看见什么、能做什么" }),
+      ], { note: "能听会说、能操作屏幕、能被事件叫醒", file: "chapter6", ch: 6, part: "构建" })
+    ], { note: "第 1–6 章：造出一个 Agent" }),
     limb("lift", "提升", [
       limb("ch7", "7 评估", [
         limb("ch7-rate", "怎样算成功", [
@@ -693,7 +758,7 @@ const TREE = {
           twig("端到端回归，和轨迹前缀边界", "chapter7", "端到端回归任务与轨迹前缀回归任务"),
           twig("闭环：观察、假设、实验、验证", "chapter7", "本章小结")
         ])
-      ], { note: "怎样算变好", file: "chapter7", ch: 7, part: "提升" }),
+      ], { note: "怎样知道它真的变好了", file: "chapter7", ch: 7, part: "提升" }),
       limb("ch8", "8 后训练", [
         limb("ch8-four", "四阶段", [
           twig("都在改下一个词的概率", "chapter8", "从预训练到 RL：四阶段全景"),
@@ -707,7 +772,7 @@ const TREE = {
           twig("底座、协议、策略分开选", "chapter8", "何时选择 Mid-training、SFT 与 RL"),
           twig("数据和环境比算法重要", "chapter8", "本章小结")
         ])
-      ], { note: "改的是参数", file: "chapter8", ch: 8, part: "提升" }),
+      ], { note: "直接训练模型本身（入门可先跳过）", file: "chapter8", ch: 8, part: "提升" }),
       limb("ch9", "9 持续进化", [
         limb("ch9-loop", "闭环", [
           twig("在线记录，离线发布", "chapter9", "构建可长期运行的持续进化闭环"),
@@ -719,7 +784,7 @@ const TREE = {
           twig("发布要过边界集和保留集", "chapter9", "可验证闭环的边界：当“完成”不等于“进步”"),
           twig("结果可自动验证时最可靠", "chapter9", "本章小结")
         ])
-      ], { note: "经验留在哪", file: "chapter9", ch: 9, part: "提升" }),
+      ], { note: "把做过的事变成经验", file: "chapter9", ch: 9, part: "提升" }),
       limb("ch10", "10 多 Agent", [
         limb("ch10-when", "值不值得", [
           twig("要有单次生成拿不到的新信息", "chapter10", "多 Agent 何时真正优于单 Agent"),
@@ -732,8 +797,8 @@ const TREE = {
           twig("失败：冲突、级联、趋同、扯皮、失控、理解债", "chapter10", "多 Agent 协作的失败模式"),
           twig("人不能把理解一起外包", "chapter10", "失败模式六：理解债与认知投降")
         ])
-      ], { note: "何时真的更强", file: "chapter10", ch: 10, part: "提升" })
-    ], { note: "第 7–10 章，怎样知道它变好了" })
+      ], { note: "几个 Agent 什么时候值得一起干", file: "chapter10", ch: 10, part: "提升" })
+    ], { note: "第 7–10 章：让它越用越好" })
   ]
 };
 
@@ -764,6 +829,7 @@ function renderBranch(node, depth) {
 function renderMap() {
   return `
     <div class="tree-tools">
+      <button type="button" class="chip" data-tree-cmd="chapters">只看十章</button>
       <button type="button" class="chip" data-tree-cmd="all">展开全部</button>
       <button type="button" class="chip" data-tree-cmd="none">收起全部</button>
     </div>
@@ -771,21 +837,29 @@ function renderMap() {
 }
 
 function renderGraph() {
-  const lines = EDGES.map(([a, b]) => {
+  const shown = graphAll ? NODES : NODES.filter(n => GRAPH_BASIC.includes(n.id));
+  const ids = shown.map(n => n.id);
+  if (!ids.includes(selectedNode)) selectedNode = "agent";
+  const edges = EDGES.filter(([a, b]) => ids.includes(a) && ids.includes(b));
+  const lines = edges.map(([a, b]) => {
     const A = nodeById(a), B = nodeById(b);
     const on = a === selectedNode || b === selectedNode;
     const cls = on ? " on" : "";
     return `<line class="base${cls}" x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}"/><line class="flow${cls}" x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}"/>`;
   }).join("");
-  const nodes = NODES.map(n => `
+  const nodes = shown.map(n => `
     <g class="n ${n.core ? "core" : ""} ${n.id === selectedNode ? "on" : ""}" data-node="${n.id}">
       <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="8"/>
       <text x="${n.x + n.w / 2}" y="${n.y + 23}" text-anchor="middle">${esc(n.label)}</text>
     </g>`).join("");
   const cur = nodeById(selectedNode);
-  const related = EDGES.filter(e => e.includes(selectedNode)).map(e => e[0] === selectedNode ? e[1] : e[0]);
+  const related = edges.filter(e => e.includes(selectedNode)).map(e => e[0] === selectedNode ? e[1] : e[0]);
   return `
-    <svg class="graph" viewBox="0 0 1040 520">${lines}${nodes}</svg>
+    <div class="graph-tools">
+      <button type="button" class="chip" data-graph="basic" aria-pressed="${!graphAll}">基础 ${GRAPH_BASIC.length} 个</button>
+      <button type="button" class="chip" data-graph="all" aria-pressed="${graphAll}">全部 ${NODES.length} 个</button>
+    </div>
+    <svg class="graph" viewBox="${graphAll ? "0 0 1040 520" : "160 10 720 400"}">${lines}${nodes}</svg>
     <div class="panel detail">
       <div class="k">当前概念</div>
       <h3>${esc(cur.label)}</h3>
@@ -794,10 +868,27 @@ function renderGraph() {
     </div>`;
 }
 
+function basicCard(c) {
+  return `
+      <article class="panel card basic">
+        <h3>${esc(c[0])}</h3>
+        <p>${esc(c[1])}</p>
+        <div class="ex"><strong>例子</strong>　${esc(c[2])}</div>
+        <p class="remember"><strong>记住</strong>　${esc(c[3])}</p>
+        <a class="src" href="${href(c[4], c[5])}">核对原文 · ${esc(plainHeading(c[5]))}</a>
+      </article>`;
+}
 function renderCards() {
-  const chips = [`<button class="chip" data-filter="0" aria-pressed="${chapterFilter === 0}">全部</button>`]
+  const chips = [`<button class="chip" data-filter="-2" aria-pressed="${chapterFilter === -2}">入门 ${BASICS.length} 张</button>`,
+    `<button class="chip" data-filter="0" aria-pressed="${chapterFilter === 0}">各章全部</button>`]
     .concat(CHAPTERS.map(c => `<button class="chip" data-filter="${c.id}" aria-pressed="${chapterFilter === c.id}">${c.id} ${esc(c.title)}</button>`))
     .concat(`<button class="chip" data-filter="-1" aria-pressed="${chapterFilter === -1}">后记</button>`);
+  if (chapterFilter === -2) {
+    return `
+    <div class="chips" style="margin-bottom:14px">${chips.join("")}</div>
+    <div class="cards">${BASICS.map(basicCard).join("")}</div>
+    <p class="pit" style="margin-top:12px">这 ${BASICS.length} 张都能讲出来，再点上面的章节，看各章的 ${CARDS.length} 张进阶卡片。</p>`;
+  }
   const list = CARDS.filter(c => chapterFilter === 0 || (chapterFilter === -1 ? c[0] === 0 : c[0] === chapterFilter));
   return `
     <div class="chips" style="margin-bottom:14px">${chips.join("")}</div>
@@ -839,10 +930,12 @@ function treeHits(node, ancestors, q, out) {
 function renderSearch(q) {
   const s = q.toLowerCase();
   const hits = treeHits(TREE, [], s, []);
+  const basics = BASICS.filter(c => c.join(" ").toLowerCase().includes(s));
   const cards = CARDS.filter(c => c.join(" ").toLowerCase().includes(s));
   const qas = QA.filter(item => item.join(" ").toLowerCase().includes(s));
-  if (!hits.length && !cards.length && !qas.length) return `<div class="panel">没有匹配「${esc(q)}」。试试：缓存、Pass、Skill、护栏、RL。</div>`;
+  if (!basics.length && !hits.length && !cards.length && !qas.length) return `<div class="panel">没有匹配「${esc(q)}」。试试：上下文、工具、Harness、提示注入、评估。</div>`;
   return `
+    ${basics.length ? `<h2>入门卡片</h2><div class="cards">${basics.map(basicCard).join("")}</div>` : ""}
     <h2>知识树</h2>
     ${hits.map(path => {
       const node = path[path.length - 1];
@@ -859,6 +952,7 @@ function bind() {
   document.querySelectorAll("[data-tree-cmd]").forEach(el => el.addEventListener("click", () => {
     openTree.clear();
     if (el.dataset.treeCmd === "all") branchIds(TREE, []).forEach(id => openTree.add(id));
+    else if (el.dataset.treeCmd === "chapters") ["root", "build", "lift"].forEach(id => openTree.add(id));
     else openTree.add("root");
     render();
   }));
@@ -880,6 +974,16 @@ function bind() {
   }));
   document.querySelectorAll("[data-filter]").forEach(el => el.addEventListener("click", () => {
     chapterFilter = Number(el.dataset.filter);
+    render();
+  }));
+  document.querySelectorAll("[data-graph]").forEach(el => el.addEventListener("click", () => {
+    graphAll = el.dataset.graph === "all";
+    render();
+  }));
+  document.querySelectorAll("[data-go]").forEach(el => el.addEventListener("click", () => {
+    view = el.dataset.go;
+    if (view === "cards") chapterFilter = -2;
+    window.scrollTo(0, 0);
     render();
   }));
   document.querySelectorAll("[data-node]").forEach(el => el.addEventListener("click", () => {
@@ -954,7 +1058,7 @@ function paintClips() {
   const root = document.getElementById("clips");
   const list = document.getElementById("clip-list");
   const status = document.getElementById("clip-status");
-  if (!clipReady) {
+  if (!clipReady || !clips.length) {
     root.classList.add("hidden");
     document.querySelector(".app").classList.remove("with-clips", "clips-collapsed");
     return;
