@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI Agent 学习图谱</title>
+<style>
+  :root {
+    --bg: #f3efe6;
+    --ink: #1c1915;
+    --muted: #5e584e;
+    --line: #ddd4c4;
+    --card: #fffcf7;
+    --accent: #9a3412;
+    --accent-soft: #f3e4d8;
+    --teal: #0f5c57;
+    --teal-soft: #e4f0ee;
+    --gold: #7a5b24;
+    --shadow: 0 1px 0 rgba(28, 25, 21, 0.04);
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Songti SC", "Noto Serif SC", serif;
+    --sans: "SF Pro Text", "PingFang SC", "Noto Sans SC", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--teal); }
+  .app { display: grid; grid-template-columns: 220px 1fr; min-height: 100%; }
+  aside {
+    position: sticky; top: 0; height: 100vh;
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    background: #efeae0;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .brand { font-family: var(--serif); font-size: 22px; line-height: 1.25; letter-spacing: -0.02em; }
+  .brand small { display: block; margin-top: 6px; font-family: var(--sans); font-size: 12px; color: var(--muted); font-weight: 400; letter-spacing: 0; }
+  nav { display: flex; flex-direction: column; gap: 4px; }
+  nav button {
+    text-align: left; background: transparent; border: 0;
+    padding: 8px 10px; border-radius: 8px; color: var(--muted);
+  }
+  nav button[aria-current="page"] { background: var(--card); color: var(--ink); box-shadow: var(--shadow); }
+  .side-note { margin-top: auto; font-size: 12px; color: var(--muted); }
+  .side-note p { margin: 8px 0 0; }
+  main { padding: 28px 36px 64px; max-width: 1180px; min-width: 0; }
+  header.top { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; }
+  h1 { font-family: var(--serif); font-weight: 500; font-size: 34px; margin: 0; letter-spacing: -0.03em; }
+  .lede { color: var(--muted); margin: 6px 0 0; max-width: 640px; }
+  input[type="search"] {
+    width: 260px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 14px; outline: none;
+  }
+  input[type="search"]:focus { border-color: var(--teal); }
+  .formula {
+    display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; margin-bottom: 16px;
+  }
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px;
+  }
+  .formula .eq { font-family: var(--serif); font-size: 28px; line-height: 1.3; margin: 0 0 8px; }
+  .eq em { font-style: normal; color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip {
+    border: 1px solid var(--line); background: transparent; border-radius: 999px;
+    padding: 4px 10px; font-size: 13px; color: var(--muted);
+  }
+  .chip[aria-pressed="true"], .chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 22px 0 10px; }
+  h3 { font-size: 15px; margin: 0 0 6px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .k { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+  ul.clean { margin: 8px 0 0; padding-left: 18px; }
+  ul.clean li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12px; }
+  .map-wrap { display: grid; grid-template-columns: 1fr 280px 1fr; gap: 12px; align-items: start; }
+  .wing { display: flex; flex-direction: column; gap: 8px; }
+  .wing.right { text-align: right; }
+  .node {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 12px; text-align: left;
+  }
+  .wing.right .node { text-align: left; }
+  .node strong { display: block; font-size: 14px; }
+  .node span { color: var(--muted); font-size: 12px; }
+  .node[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .center-card {
+    background: var(--ink); color: #f6f1e7; border-radius: 16px; padding: 22px 16px; text-align: center;
+  }
+  .center-card p { margin: 8px 0 0; font-family: var(--serif); font-size: 22px; line-height: 1.35; }
+  .detail { margin-top: 14px; }
+  .tree-tools { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ktree { overflow-x: auto; padding: 8px 4px 28px; }
+  .kbranch { display: flex; flex-direction: row; align-items: center; flex: none; }
+  .knode {
+    display: inline-flex; align-items: center; gap: 8px; flex: none;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 7px 8px 7px 12px; max-width: 240px;
+  }
+  .kbody { min-width: 0; }
+  .ktitle {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+    background: transparent; border: 0; padding: 0; text-align: left; min-width: 0;
+  }
+  .ktitle strong { font-size: 14px; line-height: 1.35; word-break: keep-all; }
+  .ktitle span, .knode .src { color: var(--muted); font-size: 12px; }
+  .knode .src { margin-top: 2px; }
+  .kfold {
+    width: 22px; height: 22px; flex: none; border-radius: 99px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--accent);
+    padding: 0; line-height: 20px; position: relative; z-index: 1;
+  }
+  .d0 > .knode { background: var(--ink); color: #f6f1e7; border-color: var(--ink); }
+  .d0 > .knode .ktitle span, .d0 > .knode .src { color: #e7c7a4; }
+  .d0 > .knode .kfold { background: #f6f1e7; color: var(--ink); border-color: transparent; }
+  .d1 > .knode { background: #fbf6ef; }
+  .d3 > .knode, .d4 > .knode { background: var(--teal-soft); border-color: transparent; }
+  .kbranch > ul {
+    display: flex; flex-direction: row; align-items: center; flex: none;
+    list-style: none; gap: 8px; margin: 0 0 0 18px; padding: 0; position: relative;
+  }
+  .kbranch > ul::before {
+    content: ""; position: absolute; left: -18px; top: 50%; width: 18px; border-top: 1.5px solid #c3b9a6;
+  }
+  .kbranch > ul > li { display: flex; flex: none; padding: 0; }
+  .preview { position: fixed; inset: 0; z-index: 40; background: rgba(28, 25, 21, .35); display: flex; justify-content: flex-end; }
+  .preview-panel { width: min(760px, 100%); height: 100%; overflow: auto; background: var(--bg); padding: 18px 28px 72px; box-shadow: -8px 0 24px rgba(28, 25, 21, .12); }
+  .preview-bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg); padding: 6px 0 12px; }
+  .preview-bar strong { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+  .preview-close { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 12px; }
+  .preview-body { font-size: 15px; }
+  .preview-body h1, .preview-body h2, .preview-body h3, .preview-body h4 { font-family: var(--serif); font-weight: 500; scroll-margin-top: 64px; }
+  .preview-body h1 { font-size: 28px; }
+  .preview-body h2 { font-size: 22px; margin-top: 28px; }
+  .preview-body h3, .preview-body h4 { font-size: 18px; }
+  .preview-body .hit { background: var(--accent-soft); border-radius: 8px; padding: 4px 8px; }
+  .preview-body img { max-width: 100%; height: auto; }
+  .preview-body pre { overflow: auto; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .preview-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  .preview-body blockquote { margin: 12px 0; padding: 4px 0 4px 12px; border-left: 3px solid var(--line); color: var(--muted); }
+  .preview-body table { display: block; overflow-x: auto; }
+  .points { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .points span { background: var(--teal-soft); color: var(--teal); border-radius: 8px; padding: 4px 8px; font-size: 13px; }
+.point-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.point-list a, a.src { text-decoration: none; }
+.point-list a { display: block; background: var(--teal-soft); color: var(--teal); border-radius: 8px; padding: 8px 10px; }
+.point-list a small, a.src { display: block; margin-top: 3px; color: var(--gold); font-size: 12px; }
+a.src { margin-top: 10px; }
+  svg.graph { width: 100%; height: auto; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+  svg.graph text { font-family: var(--sans); font-size: 13px; }
+  svg.graph .n { cursor: pointer; }
+  svg.graph .n rect { fill: #fffcf7; stroke: #cfc6b6; }
+  svg.graph .n.core rect { fill: #1c1915; stroke: #1c1915; }
+  svg.graph .n.core text { fill: #f6f1e7; }
+  svg.graph .n.on rect { fill: #f3e4d8; stroke: #9a3412; }
+  svg.graph line { stroke: #c3b9a6; }
+  svg.graph line.on { stroke: #9a3412; stroke-width: 2; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .card h3 { font-family: var(--serif); font-size: 18px; font-weight: 500; }
+  .tag { font-size: 12px; color: var(--accent); }
+  .remember { margin-top: 8px; color: var(--ink); }
+  .pit { margin-top: 8px; color: var(--muted); font-size: 13px; }
+  .acc { border-top: 1px solid var(--line); }
+  .acc button.row {
+    width: 100%; text-align: left; background: transparent; border: 0;
+    padding: 14px 0; display: flex; justify-content: space-between; gap: 12px;
+  }
+  .acc .body { display: none; padding: 0 0 14px; color: var(--ink); }
+  .acc.open .body { display: block; }
+  .stars { color: var(--gold); letter-spacing: 0.05em; font-size: 12px; }
+  .hidden { display: none !important; }
+  .result-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .app.with-clips { grid-template-columns: 220px minmax(0, 1fr) 280px; }
+  .clips {
+    position: sticky; top: 0; height: 100vh; overflow: auto;
+    padding: 28px 16px 32px; border-left: 1px solid var(--line);
+    background: #efeae0; display: flex; flex-direction: column; gap: 12px;
+  }
+  .clips h2 { margin: 0; font-size: 20px; }
+  .clip-empty { margin: 0; color: var(--muted); font-size: 13px; }
+  .clip-list { display: flex; flex-direction: column; gap: 8px; }
+  .clip { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .clip p { margin: 4px 0 0; font-size: 13px; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  .clip-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: var(--muted); font-size: 12px; }
+  .clip-jump { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 0; font-weight: 600; }
+  .clip-del { border: 0; background: transparent; color: var(--muted); padding: 0; }
+  @media (max-width: 960px) {
+    .app, .app.with-clips { grid-template-columns: 1fr; }
+    aside, .clips { position: relative; height: auto; border-right: 0; border-left: 0; border-bottom: 1px solid var(--line); }
+    nav { flex-direction: row; flex-wrap: wrap; }
+    main { padding: 20px 16px 48px; }
+    header.top, .formula, .grid-2, .grid-3, .map-wrap { grid-template-columns: 1fr; display: grid; }
+    .wing.right { text-align: left; }
+    input[type="search"] { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">学习图谱<small>深入理解 AI Agent · 中文正文</small></div>
+    <nav id="nav">
+      <button data-view="home">总览</button>
+      <button data-view="map">脑图</button>
+      <button data-view="graph">图谱</button>
+      <button data-view="cards">卡片</button>
+      <button data-view="chapters">精要</button>
+      <button data-view="interview">面试</button>
+    </nav>
+    <div class="side-note">笔记全文在 <a href="docs/核心总结.md">docs/</a>。双击本页即可阅读，不依赖服务器。</div>
+  </aside>
+  <main>
+    <header class="top">
+      <div>
+        <h1 id="title">总览</h1>
+        <p class="lede" id="lede">先记住公式，再按构建和提升两条线往下走。</p>
+      </div>
+      <input id="q" type="search" placeholder="搜索概念、卡片、面试题" />
+    </header>
+    <section id="view"></section>
+  </main>
+  <aside id="clips" class="clips hidden" aria-label="划词记录">
+    <h2>划词记录</h2>
+    <p class="clip-empty" id="clip-status">点一章，或选中一段文字。</p>
+    <div class="clip-list" id="clip-list"></div>
+  </aside>
+</div>
+<div id="preview" class="preview hidden">
+  <div class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="preview-title">
+    <div class="preview-bar">
+      <strong id="preview-title">原文</strong>
+      <button type="button" class="preview-close" id="preview-close">关闭</button>
+    </div>
+    <p id="preview-note" class="pit"></p>
+    <article id="preview-body" class="preview-body"></article>
+  </div>
+</div>
+<script>
+const VIEWS = {
+  home: ["总览", "先记住公式，再按构建和提升两条线往下走。"],
+  map: ["脑图", "展开后向右排开，同一级排成一行。点圆点收起，数字是下一级的数量。"],
+  graph: ["图谱", "点一个概念，看它和谁相连。关系比名词重要。"],
+  cards: ["知识卡片", "一张卡片只留一个设计判断。"],
+  chapters: ["章节精要", "每章记住什么，以及它在全书里的位置。"],
+  interview: ["面试重点", "先给判断，再给结构，最后用一个例子收住。"]
+};
+
+const CHAPTERS = [
+  { id: 1, part: "构建", title: "入门", line: "公式、ReAct、Harness", points: [
+    ["Agent = LLM + 上下文 + 工具，环境在边界外", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
+    ["Harness = 上下文 + 工具 + 约束 + 验证 + 纠正", "chapter1", "Harness 工程：模型之外的竞争力"],
+    ["先提示，再工作流，最后才自主", "chapter1", "编排模式：工作流与自主"],
+    ["五模式：审核分离、渐进披露、只增不改、边界集、最小 diff", "chapter1", "贯穿全书的设计模式"],
+    ["护栏按绕过难度：上下文、执行、数据", "chapter1", "护栏与安全性"]
+  ]},
+  { id: 2, part: "构建", title: "上下文", line: "一次任务能看见什么", points: [
+    ["上下文质量决定上限", "chapter2", "上下文：决定 Agent 能力上限的关键"],
+    ["静态前缀 + 只追加轨迹", "chapter1", "ReAct 循环"],
+    ["前缀不改，动态信息放末尾", "chapter2", "KV Cache 友好的上下文设计"],
+    ["Skills 目录常驻、正文按需", "chapter2", "动态提示词与 Agent Skills"],
+    ["压缩提升密度；隔离优于压缩", "chapter2", "上下文压缩策略"]
+  ]},
+  { id: 3, part: "构建", title: "记忆与知识库", line: "跨会话还在", points: [
+    ["三层能力：回忆、多会话、主动服务", "chapter3", "记忆能力的评估：三层次框架"],
+    ["轨迹是流水账，长期记忆是档案", "chapter3", "记忆的层次结构"],
+    ["关键事实结构化，海量细节再检索", "chapter3", "用户记忆的四种存储格式"],
+    ["智能体化 RAG 把检索变成工具", "chapter3", "智能体化 RAG：将知识检索工具化的范式转变"],
+    ["检索必须按权限过滤", "chapter3", "用户记忆和知识库的定期整理"]
+  ]},
+  { id: 4, part: "构建", title: "工具", line: "能读取和改变什么", points: [
+    ["感知控体积，执行控风险", "chapter4", "工具的分类"],
+    ["形态和披露是两个决定", "chapter4", "能力的表达形式：专用工具、通用执行器与 Skill"],
+    ["描述写清何时不用", "chapter4", "工具描述的艺术"],
+    ["参数不得静默改写", "chapter4", "参数传递的保真性"],
+    ["MCP 描述本身可以是注入", "chapter4", "工具生态：MCP 与 Skill Hub"]
+  ]},
+  { id: 5, part: "构建", title: "代码", line: "能创造新工具", points: [
+    ["测试和类型系统就是现成 Harness", "chapter5", "Harness 工程在 Coding Agent 中的实践"],
+    ["代码用于思考、规则、适配、界面和自举", "chapter5", "代码：通用 Agent 的元能力"],
+    ["致命三要素再加记忆放大器", "chapter5", "Coding Agent 的安全"],
+    ["外部内容是数据，不是指令", "chapter5", "Coding Agent 的安全"],
+    ["命令安全靠语义解析", "chapter5", "Coding Agent 的安全"]
+  ]},
+  { id: 6, part: "构建", title: "交互", line: "模态与时机", points: [
+    ["异步改变时机，不改变模态", "chapter6", "异步与事件驱动：当世界主动找上门"],
+    ["语音从级联走到全双工", "chapter6", "语音：最自然的人机接口"],
+    ["快路径说话，慢路径深想", "chapter6", "认知时序：实时交互与深度思考"],
+    ["屏幕和机器人都要动作后确认", "chapter6", "Computer Use：GUI 自动化 Agent"],
+    ["原语：唤醒、安全点、取消、抢占、快慢分离", "chapter6", "本章小结"]
+  ]},
+  { id: 7, part: "提升", title: "评估", line: "怎样算变好", points: [
+    ["Pass@k 看上限，Pass^k 看可靠性", "chapter7", "评估指标：成功的定义"],
+    ["环境要可重置，工具保持原子", "chapter7", "五个组成要素"],
+    ["结果、过程、体验分层打分", "chapter9", "从运行轨迹中获得学习信号"],
+    ["证据不足就拒评", "chapter9", "从运行轨迹中获得学习信号"],
+    ["端到端之外还要测轨迹前缀边界", "chapter7", "端到端回归任务与轨迹前缀回归任务"]
+  ]},
+  { id: 8, part: "提升", title: "后训练", line: "改的是参数", points: [
+    ["四阶段都是在改下一个词的概率", "chapter8", "从预训练到 RL：四阶段全景"],
+    ["底座、协议、策略分开处理", "chapter8", "何时选择 Mid-training、SFT 与 RL"],
+    ["pass@k 接近 0 不要上 RL", "chapter8", "什么时候需要先补底座，再做 SFT/RL"],
+    ["SFT 样本效率高，RL 才能抬策略", "chapter8", "SFT 与 RL 的本质区别"],
+    ["数据和环境比算法重要", "chapter8", "本章小结"]
+  ]},
+  { id: 9, part: "提升", title: "持续进化", line: "经验留在哪", points: [
+    ["在线记录，离线发布", "chapter9", "构建可长期运行的持续进化闭环"],
+    ["结果、过程、质量三层信号", "chapter9", "从运行轨迹中获得学习信号"],
+    ["知识、指令、程序、参数四载体", "chapter9", "Agent 持续进化的四种方法"],
+    ["低置信度不进学习集", "chapter9", "从运行轨迹中获得学习信号"],
+    ["边界集和保留集一起看", "chapter9", "可验证闭环的边界：当“完成”不等于“进步”"]
+  ]},
+  { id: 10, part: "提升", title: "多 Agent", line: "何时真的更强", points: [
+    ["价值等于新信息减去额外成本", "chapter10", "多 Agent 何时真正优于单 Agent"],
+    ["自我审查通常不增加信息", "chapter10", "多 Agent 何时真正优于单 Agent"],
+    ["共享或隔离 × 对等、管理者、去中心", "chapter10", "维度一：上下文是否共享"],
+    ["同质意见不是独立证据", "chapter10", "失败模式三：同质趋同"],
+    ["人不能把理解一起外包", "chapter10", "失败模式六：理解债与认知投降"]
+  ]}
+];
+
+const CARDS = [
+  [1, "三层公式", "实现、直觉、学术说的是同一件事。", "模型固定时，先扩展观察和动作。", "沙盒里的文件属于环境，不属于 Harness。", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
+  [1, "Harness 五要素", "能做事靠上下文和工具，不做错靠约束、验证、纠正。", "验证看测试和结构化状态，不看模型自述。", "Harness 变厚不等于更好，边界内的判断还给模型。", "chapter1", "Harness 五要素与「构建」部分的对应"],
+  [1, "编排光谱", "一次调用、工作流、自主 Agent，按不确定程度往上加。", "自主循环必须有完成、轮数或失败的停止条件。", "一开始就画很长的固定流水线，例外只能靠继续加节点。", "chapter1", "编排模式：工作流与自主"],
+  [1, "五条设计模式", "审核分离、渐进披露、只增不改、边界集、最小 diff。", "审核者看产物，不看产出方的推理。", "同一个上下文里的自审看不见自己的盲区。", "chapter1", "贯穿全书的设计模式"],
+  [1, "三层护栏", "看见什么、做什么、世界最终怎样，一层比一层难绕过。", "高风险和失败超限才把人叫进来。", "只测拦截、不测误伤，护栏会把合法任务一起拒绝。", "chapter1", "护栏类型"],
+  [1, "三条更新路径", "当场适应、写外部产物、改参数。可回滚程度依次变低。", "说得清的规则不要先去微调。", "把上下文学习当成会自动跨会话保留。", "chapter1", "Agent 的学习机制：从上下文适应到持久更新"],
+  [2, "上下文决定上限", "Agent 像永远的新员工，背景不在文档里就用不上。", "API 无状态，每轮都要重拼完整上下文。", "以为最后一条用户消息就够了。", "chapter2", "上下文：决定 Agent 能力上限的关键"],
+  [2, "五段上下文", "系统提示和工具定义是前缀，其余是轨迹。", "没有工具定义时，模型仍可能交一份完整的编造。", "Agent 场景里把历史思考全部丢掉，计划会断。", "chapter1", "上下文：Agent 的眼睛"],
+  [2, "KV 三条铁律", "前缀不改，动态信息放末尾，消息用标准 API。", "KV Cache 管单次推理，Prompt Cache 管跨请求复用。", "滑动窗口删最早消息，既打掉缓存，也丢掉工具结果。", "chapter2", "KV Cache 友好的上下文设计"],
+  [2, "缓存是架构约束", "提示词顺序先服从缓存边界，再服从语义。", "思考若绑在前缀上，改前缀会让推理作废。", "把时间戳写进系统提示，首 token 延迟和账单一起涨。", "chapter2", "缓存作为架构约束"],
+  [2, "Skills", "目录常驻，正文在调用点追加。", "description 写何时用、何时不用，并给反例。", "把所有工具 schema 和所有 Skill 正文一起塞进前缀。", "chapter2", "动态提示词与 Agent Skills"],
+  [2, "状态栏", "用代码把进度和计数写成可检索结论。", "注意力擅长查找，不擅长临时做统计。", "状态栏算错时，模型会信这块显式信息。", "chapter2", "Agent 状态栏：通过元信息增强 Agent 轨迹管理"],
+  [2, "压缩与隔离", "两次调用之间压缩历史；前缀不动。", "大探索交给子 Agent，主上下文只收结论。", "把索引期补前缀的检索，和运行期删历史的压缩当成一回事。", "chapter2", "上下文压缩策略"],
+  [3, "记忆三层次", "基础回忆、多会话检索、主动服务。", "评测时不能回看原对话，只能看写下的记忆。", "用单次闲聊的感觉代替分层评估。", "chapter3", "记忆能力的评估：三层次框架"],
+  [3, "四种存储", "短事实、叙事段落、JSON 卡片、带人物关系的卡片。", "少而关键的用结构，多而非关键的用短事实。", "写入时静默删掉旧住址，一次抽错就不可逆。", "chapter3", "用户记忆的四种存储格式"],
+  [3, "三套分类正交", "存在哪里、怎么存、存什么，可以自由组合。", "轨迹只增不改；长期记忆会合并和淘汰。", "把工作记忆当成完整轨迹。", "chapter3", "用户记忆的认知科学基础"],
+  [3, "RAG 与智能体化", "分块、稠密、稀疏、融合、重排、生成。", "单跳一次检索；多跳把检索做成工具。", "敏感段落不做权限过滤就进了上下文。", "chapter3", "智能体化 RAG：将知识检索工具化的范式转变"],
+  [3, "双层记忆", "卡片提供全局，检索提供原话。", "主动服务需要两层同时在。", "只靠检索，看不见跨会话的隐关联。", "chapter3", "RAG 技巧：上下文感知检索"],
+  [4, "五类工具", "感知、执行、协作、用户沟通、事件触发。", "感知控输出体积，执行控风险。", "把事件触发当成又一个普通的同步函数。", "chapter4", "工具的分类"],
+  [4, "形态与披露", "做成专用工具还是 Skill，和一次给模型看多少条，是两件事。", "默认通用；安全、复杂参数、极高频、平台差异才专用。", "参数复杂却让模型手写 shell 转义。", "chapter4", "能力的表达形式：专用工具、通用执行器与 Skill"],
+  [4, "描述与保真", "写清何时不用，参数给例子。", "选错工具先改描述。看见的参数必须是执行的参数。", "工具偷偷改引号或追加参数，模型无法自诊。", "chapter4", "参数传递的保真性"],
+  [4, "MCP 风险", "工具描述进入上下文，本身就是注入面。", "审查描述、锁版本、最小权限。", "同名工具把调用带到恶意服务器。", "chapter4", "工具生态：MCP 与 Skill Hub"],
+  [5, "代码是元能力", "思考、业务规则、多媒体、适配、界面、自举。", "一次成功补丁还不是持续进化。", "只把代码理解成写程序。", "chapter5", "代码：通用 Agent 的元能力"],
+  [5, "致命三要素", "私有数据、不可信内容、对外通信同时打开就危险。", "持久记忆会把一次注入放大成跨会话潜伏。", "用关键字黑名单理解 shell。", "chapter5", "Coding Agent 的安全"],
+  [6, "五原语", "唤醒、安全点、取消、抢占、快慢分离。", "异步改的是时机：世界可以主动推事件。", "四类交互各做一套互不相通的控制。", "chapter6", "本章小结"],
+  [6, "语音三范式", "级联、端到端全模态、全双工。", "前台维持节奏，后台负责深想。", "端到端以后不再设计可观测性。", "chapter6", "语音：最自然的人机接口"],
+  [6, "屏幕与物理", "定位可以是坐标，也可以是元素 ID。", "完成由新观察判定，不由模型宣布。", "动作分块在环境突变后仍照单执行。", "chapter6", "Computer Use：GUI 自动化 Agent"],
+  [7, "Pass@k 与 Pass^k", "至少一次成功，对上连续 k 次都成功。", "p=0.6、k=5 时约 99% 对 7.8%。", "有副作用的任务在生产环境里重试到成功。", "chapter7", "评估指标：成功的定义"],
+  [7, "评估四环节", "成功定义、任务来源、验证方式、分数到决策。", "工具保持原子，环境每次可重置。", "只看最终对错，不测信息已在上下文时用不用。", "chapter7", "本章小结"],
+  [7, "LLM 评判", "逐项给分，引用证据，允许拒评。", "结果层优先用测试和数据库。", "把风格偏好当成任务成功。", "chapter7", "LLM-as-a-Judge：自动化评估的核心"],
+  [8, "四阶段", "预训练、Mid-training、SFT、RL 都在改下一个词的概率。", "事实走底座或 RAG，格式走 SFT，策略走 RL。", "用几千条问答去背大量事实。", "chapter8", "从预训练到 RL：四阶段全景"],
+  [8, "何时 SFT 与 RL", "抽不出成功轨迹就别上 RL。格式不稳先 SFT。", "数据和环境先于算法。模拟器的偏差是天花板。", "把“SFT 记忆、RL 泛化”当成不受奖励影响的定律。", "chapter8", "何时选择 Mid-training、SFT 与 RL"],
+  [9, "三层学习信号", "办成没有、是否按规定、用户舒不舒服。", "单一总分无法决定改知识还是改代码。", "删掉失败测试让 CI 变绿，结果层会放过。", "chapter9", "从运行轨迹中获得学习信号"],
+  [9, "四载体", "知识、Prompt/Skill、程序、参数。", "在线只记证据，离线验证后再发布。", "满意度上升就更新，同时违规率也在涨。", "chapter9", "Agent 持续进化的四种方法"],
+  [10, "多 Agent 判据", "有没有单次生成拿不到的新信息。", "测试、截图、外部核验算新信息；互读思考不算。", "收益盖不住成倍 token 仍拆成很多 Agent。", "chapter10", "多 Agent 何时真正优于单 Agent"],
+  [10, "两维与失败", "共享或隔离，再加对等、管理者、去中心。", "同质模型的多份意见不是独立证据。", "人把理解外包出去，出事时看不懂自己的系统。", "chapter10", "多 Agent 协作的分类框架"],
+  [0, "两朵乌云", "实时交互，以及上岗之后继续学具体世界。", "模型会逐层吃掉 Harness，同时打开新前沿。", "把即将被内化的脚手架当成长期壁垒。", "afterword", "两朵乌云 {.unnumbered}"]
+];
+
+const QA = [
+  ["★★", "模型、上下文、工具只能加一项，加哪个？", "默认加上下文。模型只能根据看见的信息行动，工具定义和结果也在上下文里。看得到但做不到时加工具；信息齐了仍不会做，再换模型或后训练。规则每周都变，写 Skill，不要微调。", "chapter1", "现代 Agent = LLM + 上下文 + 工具"],
+  ["★★", "模型越强，为什么 Harness 更重要？", "模型吃掉的是适配层，例如套话式逐步思考、JSON 修补。吃不掉的是权限、业务约束和还做不稳的前沿。自主空间变大，出错面也变大。Harness 随模型外移，不会一次消失。", "afterword", "模型与 Agent 的共同演进 {.unnumbered}"],
+  ["★★", "工作流还是自主 Agent？", "顺序错了会出资金或合规问题，用工作流。步骤数未知、要靠反馈改计划，用自主 Agent，并写停止条件。能一次调用解决的，两者都不要上。订票可以把支付固定，把异常留成自主。", "chapter1", "编排模式：工作流与自主"],
+  ["★", "为什么审核者不能和提议者共享上下文？", "同一上下文生产盲区，也很难发现自己被注入。审核者应看测试、截图或结构化参数，不看对方的自我辩解。", "chapter1", "贯穿全书的设计模式"],
+  ["★★", "怎样控制长度又不打掉 KV Cache？", "系统提示和工具定义不改。历史只追加。大结果落盘，上下文留冻结摘要。接近阈值再批量压缩。大探索交给子 Agent。时间戳放最新消息，不写进系统提示。", "chapter2", "KV Cache 友好的上下文设计"],
+  ["★★", "腐化和溢出有何不同？", "溢出是装不下，任务中断。腐化是装得下但找不到，决策变差，表面仍在正常运行。要把结论写成可检索的话，而不是堆原始日志。", "chapter2", "为什么需要压缩：不只是长度问题"],
+  ["★★", "两个住址互相矛盾，记忆怎么处理？", "不要静默覆盖。两条都留，带时间和来源，检索时按时间排序，必要时问用户。写入阶段就删除，一次抽错不可逆。", "chapter3", "用户记忆的四种存储格式"],
+  ["★★", "传统 RAG 还是智能体化 RAG？", "单跳、查询明确，一次检索更快。需要拆问题、第一次关键词会偏，就把检索做成工具，看结果再搜。两者都要分离指令和数据，并按权限过滤。", "chapter3", "智能体化 RAG：将知识检索工具化的范式转变"],
+  ["★★", "专用工具还是 Skill？", "问审计、参数复杂度、变更频率、模型能力。高风险用专用工具；流程常变且参数简单，用 Skill 加通用执行器。这和一次展示多少条是两个决定。", "chapter4", "能力的表达形式：专用工具、通用执行器与 Skill"],
+  ["★★", "工具老选错，先查什么？", "先查描述：何时用、何时不用、边界、例子、返回结构。同时检查参数层有没有静默改写。换模型通常不如改描述。", "chapter4", "工具描述的艺术"],
+  ["★★★", "怎样防提示注入？", "上下文层做来源标注，只能降概率。执行层用上下文之外的权限、沙盒和人工确认。数据层用数据库约束兜底。不要同时无限制打开私有数据、不可信内容和对外通信。长期记忆按不可信内容审查。", "chapter1", "护栏类型"],
+  ["★★", "p=0.6，汇报 Pass@5 还是 Pass^5？", "探索看 Pass@5，约 99%，表示多试几次能碰上。退款和部署看 Pass^5，约 7.8%，表示连续可靠很难。有副作用就不能在生产上重试到成功。", "chapter7", "评估指标：成功的定义"],
+  ["★★", "什么时候 SFT，什么时候 RL？", "pass@k 接近 0，先补底座。输出无法解析，先 SFT 把格式稳住。已经偶尔能做成，再用 RL 提高该策略的概率。奖励偏了，RL 会走捷径。数据和环境先于算法。", "chapter8", "何时选择 Mid-training、SFT 与 RL"],
+  ["★★★", "多轮任务的功劳怎么分？", "最终成败太稀疏。能用规则看到的中间状态就给过程信号，例如测试由失败变通过、违规动作即时惩罚。终点仍要核验，避免过程好看但结果造假。", "chapter9", "从运行轨迹中获得学习信号"],
+  ["★★", "虚假承诺改知识、Skill、代码还是参数？", "不知道政策就补知识。边界说不清就写 Skill。承诺必须对照真实工具日志，用代码拦住发送。语气问题才考虑后训练。用边界集证明问题下降，用保留集证明正常任务没被误伤。", "chapter9", "Agent 持续进化的四种方法"],
+  ["★★", "什么时候上多 Agent？", "先问有没有新信息。测试、截图、外部核验、分工搜索有；互读思考通常没有。再看 token 倍数。隔离上下文，用移交包通信。同质审核不算独立证据。给循环加预算和取消。", "chapter10", "多 Agent 何时真正优于单 Agent"],
+  ["★★★", "长任务如何避免上下文耗尽和过早完成？", "前缀不动。计划写进文档。大探索用子 Agent。压缩保留决策、约束、失败和来源。完成由验证器判定。连续失败要熔断。交接物要让下一个会话接得上。", "chapter2", "上下文压缩策略"],
+  ["★★", "每轮更新余额，怎样不打掉缓存？", "不要写进系统提示。需要时用工具读，或追加为最新消息。状态栏如果改写前缀中间，缓存和已绑定思考会一起失效。", "chapter2", "KV Cache 友好的上下文设计"],
+  ["★★★", "模型会让 Agent 工程师失业吗？", "只维护即将被内化的适配层，优势是临时的。留下来的是定义观察和动作、把约束放进可验证的层、建立评估和回滚、决定一次变更写进哪种载体。", "afterword", "模型与 Agent 的共同演进 {.unnumbered}"],
+  ["★★", "为什么给出回答不等于完成任务？", "缺工具定义时，模型仍会用参数记忆生成一份排版完整的答案。完成要由环境状态或验证器确认。这是评估、纠正和持续进化共用的前提。", "chapter1", "上下文：Agent 的眼睛"],
+  ["★★", "共享上下文和隔离上下文怎么选？", "共享保留细节，容易膨胀，也会继承上一角色的惯性。隔离利于并发和权限，但必须传递结构化移交包：工具参数、共享文件或消息总线。文件并发用乐观锁或独立工作副本。", "chapter10", "维度一：上下文是否共享"],
+  ["★", "后记的两朵乌云是什么？", "一是边听边想、世界不等它说完。二是上岗后继续积累具体用户和公司的经验。通用知识也许能训练进去，具体世界不行。", "afterword", "两朵乌云 {.unnumbered}"]
+];
+
+const NODES = [
+  { id: "env", x: 470, y: 28, w: 110, h: 36, label: "环境", core: false, text: "文件、网页、用户、其他 Agent、物理世界。Agent 只能通过观察和行动与它交互。" },
+  { id: "model", x: 470, y: 108, w: 110, h: 36, label: "模型", core: false, text: "策略。决定下一步做什么。能力来自预训练和后训练。" },
+  { id: "agent", x: 450, y: 188, w: 150, h: 42, label: "Agent", core: true, text: "LLM + 上下文 + 工具。生产形态是 Model + Harness。" },
+  { id: "ctx", x: 180, y: 188, w: 120, h: 36, label: "上下文", core: false, text: "静态前缀加轨迹。决定这一步能看见什么。" },
+  { id: "tools", x: 740, y: 188, w: 110, h: 36, label: "工具", core: false, text: "观察通道和动作接口。感知、执行、协作，以及沟通和事件。" },
+  { id: "harness", x: 455, y: 276, w: 140, h: 36, label: "Harness", core: false, text: "上下文、工具、约束、验证、纠正。位于模型之外、Agent 边界之内，不包含环境。" },
+  { id: "skills", x: 40, y: 108, w: 110, h: 36, label: "Skills", core: false, text: "渐进披露。目录常驻，正文按需追加。" },
+  { id: "memory", x: 40, y: 268, w: 110, h: 36, label: "记忆", core: false, text: "跨会话的个人事实。轨迹是流水账，档案会被改写。" },
+  { id: "rag", x: 180, y: 348, w: 110, h: 36, label: "知识库", core: false, text: "共享知识。分块检索，或交给智能体化 RAG。" },
+  { id: "code", x: 760, y: 108, w: 110, h: 36, label: "代码", core: false, text: "元能力。能创造工具，也继承测试和类型系统。" },
+  { id: "act", x: 900, y: 188, w: 120, h: 36, label: "交互", core: false, text: "异步、语音、屏幕、机器人。共用五原语。" },
+  { id: "guard", x: 740, y: 276, w: 110, h: 36, label: "护栏", core: false, text: "上下文层、执行层、数据层。" },
+  { id: "react", x: 470, y: 360, w: 110, h: 36, label: "ReAct", core: false, text: "想、做、看。模型决策，Harness 执行，环境给观察。" },
+  { id: "eval", x: 250, y: 450, w: 110, h: 36, label: "评估", core: false, text: "把表现变成可比较信号。Pass@k 对 Pass^k。" },
+  { id: "train", x: 40, y: 450, w: 120, h: 36, label: "后训练", core: false, text: "底座、协议、策略。数据和环境先于算法。" },
+  { id: "evo", x: 470, y: 450, w: 130, h: 36, label: "持续进化", core: false, text: "知识、指令、程序、参数。在线记录，离线发布。" },
+  { id: "multi", x: 720, y: 450, w: 140, h: 36, label: "多 Agent", core: false, text: "只有带来新信息才值得。同质审核不算独立证据。" }
+];
+
+const EDGES = [
+  ["env", "agent"], ["model", "agent"], ["agent", "ctx"], ["agent", "tools"], ["agent", "harness"],
+  ["ctx", "skills"], ["ctx", "memory"], ["memory", "rag"], ["tools", "code"], ["tools", "act"],
+  ["harness", "guard"], ["harness", "react"], ["react", "eval"], ["eval", "train"], ["eval", "evo"],
+  ["evo", "memory"], ["evo", "multi"], ["code", "multi"], ["guard", "act"]
+];
+
+let view = "home";
+let chapterFilter = 0;
+let openChapter = 1;
+let selectedNode = "agent";
+const openQa = new Set();
+const openTree = new Set(["root", "formula"]);
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+function slug(text) {
+  return text.replace(/\s*\{[^}]*\}\s*$/g, "").toLowerCase().trim()
+    .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, "")
+    .replace(/\s/g, "-");
+}
+function href(file, heading) {
+  return "book/" + file + ".md#" + encodeURIComponent(slug(heading));
+}
+function plainHeading(heading) {
+  return heading.replace(/\s*\{[^}]*\}\s*$/g, "");
+}
+function sourceLink(file, heading) {
+  return `<a class="src" href="${href(file, heading)}">原文 · ${esc(plainHeading(heading))}</a>`;
+}
+
+function nodeById(id) { return NODES.find(n => n.id === id); }
+
+function render() {
+  const meta = VIEWS[view];
+  document.getElementById("title").textContent = meta[0];
+  document.getElementById("lede").textContent = meta[1];
+  document.querySelectorAll("#nav button").forEach(b => {
+    b.setAttribute("aria-current", b.dataset.view === view ? "page" : "false");
+  });
+  const q = document.getElementById("q").value.trim();
+  document.getElementById("view").innerHTML = q ? renderSearch(q) : ({
+    home: renderHome, map: renderMap, graph: renderGraph, cards: renderCards, chapters: renderChapters, interview: renderInterview
+  }[view])();
+  bind();
+}
+
+function renderHome() {
+  return `
+    <div class="formula">
+      <div class="panel">
+        <p class="eq">Agent = <em>LLM</em> + <em>上下文</em> + <em>工具</em></p>
+        <p>生产系统写成 Model + Harness。Harness 在模型之外、Agent 之内，不包含环境。</p>
+        <div class="chips">
+          <span class="chip active">大脑 · 策略</span>
+          <span class="chip active">眼睛 · 观察</span>
+          <span class="chip active">手脚 · 行动接口</span>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="k">30 分钟</div>
+        <ul class="clean">
+          <li>第 1 章：公式、ReAct、五要素</li>
+          <li>第 2 章：前缀不改，动态放末尾，走标准 API</li>
+          <li>其余章节都是这两句的展开</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="panel"><div class="k">构建 · 第 1–6 章</div><h3>怎样造出一个 Agent</h3><p>上下文、记忆、工具、代码、交互。解决它这一次能看见什么、能做什么。</p></div>
+      <div class="panel"><div class="k">提升 · 第 7–10 章</div><h3>怎样知道它变好了</h3><p>评估、后训练、持续进化、多 Agent。没有第 7 章，后面三章分不清进步和退化。</p></div>
+    </div>
+    <h2>十条容易混的判断</h2>
+    <div class="panel">
+      <table>
+        <thead><tr><th>不要混</th><th>分开记</th></tr></thead>
+        <tbody>
+          <tr><td>KV Cache / Prompt Cache</td><td>单次推理复用，对跨请求复用同一前缀</td></tr>
+          <tr><td>溢出 / 腐化</td><td>装不下，对装得下但找不到</td></tr>
+          <tr><td>感知检索 / 感知压缩</td><td>索引时给文本块补前缀，对运行时删历史</td></tr>
+          <tr><td>轨迹 / 长期记忆</td><td>只增的流水账，对会改写的档案</td></tr>
+          <tr><td>Pass@k / Pass^k</td><td>至少成功一次，对连续 k 次都成功</td></tr>
+          <tr><td>SFT / RL</td><td>模仿示范的格式和流程，对抬高能得分策略的概率</td></tr>
+          <tr><td>工具形态 / 披露策略</td><td>一条能力怎么做，对一次给模型看多少条</td></tr>
+          <tr><td>越狱 / 提示注入</td><td>用户绕安全限制，对外部数据里藏指令</td></tr>
+          <tr><td>工作流 / 自主</td><td>路径写死，对路径由反馈决定</td></tr>
+          <tr><td>共享上下文 / 隔离</td><td>继承全部轨迹，对只传递移交包</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h2>临考前十句</h2>
+    <div class="grid-2">
+      ${["Agent = LLM + 上下文 + 工具；环境在边界外。","Harness = 上下文 + 工具 + 约束 + 验证 + 纠正。","上下文 = 静态前缀 + 只追加的轨迹。","前缀不改，动态信息放末尾。","验证看结构化事实，不看模型自述。","Pass@k 看上限，Pass^k 看可靠性。","底座用 Mid-training，协议用 SFT，策略用 RL。","进化四载体：知识、指令、程序、参数。","多 Agent 的价值等于新信息减去额外成本。","模型会逐层吃掉 Harness，但吃不完。"].map(t => `<div class="panel">${esc(t)}</div>`).join("")}
+    </div>`;
+}
+
+function twig(title, file, heading) { return { title, file, heading }; }
+function limb(id, title, children, extra) { return Object.assign({ id, title, children }, extra || {}); }
+const TREE = {
+  id: "root",
+  title: "Agent = LLM + 上下文 + 工具",
+  note: "环境在边界外",
+  file: "chapter1",
+  heading: "现代 Agent = LLM + 上下文 + 工具",
+  children: [
+    limb("formula", "公式", [
+      limb("f-struct", "结构", [
+        twig("三种说法是同一结构", "chapter1", "现代 Agent = LLM + 上下文 + 工具"),
+        twig("生产形态是 Model + Harness", "chapter1", "Harness 工程：模型之外的竞争力"),
+        twig("环境在 Agent 边界外", "chapter1", "现代 Agent = LLM + 上下文 + 工具")
+      ]),
+      limb("f-run", "怎么跑起来", [
+        twig("ReAct：想 → 做 → 看", "chapter1", "ReAct 循环"),
+        twig("上下文 = 静态前缀 + 只追加的轨迹", "chapter1", "ReAct 循环"),
+        twig("先提示，再工作流，最后才自主", "chapter1", "编排模式：工作流与自主")
+      ]),
+      limb("f-cross", "贯穿全书", [
+        twig("五条设计模式", "chapter1", "贯穿全书的设计模式"),
+        twig("护栏：上下文、执行、数据", "chapter1", "护栏类型"),
+        twig("更新：当场适应、外部产物、参数", "chapter1", "Agent 的学习机制：从上下文适应到持久更新"),
+        twig("模型会一层一层吃掉适配层", "afterword", "模型与 Agent 的共同演进 {.unnumbered}")
+      ])
+    ], { note: "先记住这一层", file: "chapter1", heading: "现代 Agent = LLM + 上下文 + 工具" }),
+    limb("build", "构建", [
+      limb("ch1", "1 入门", [
+        limb("ch1-gap", "从哪做起", [
+          twig("Demo 和产品的差距在 Harness", "chapter1", "Harness 工程：模型之外的竞争力"),
+          twig("简单、透明、ACI", "chapter1", "构建有效 Agent 的核心原则")
+        ]),
+        limb("ch1-flow", "编排", [
+          twig("工作流路径固定，必须有停止条件", "chapter1", "编排模式：工作流与自主"),
+          twig("模型一层一层吃掉适配层", "afterword", "模型与 Agent 的共同演进 {.unnumbered}")
+        ])
+      ], { note: "公式、ReAct、Harness", file: "chapter1", ch: 1, part: "构建" }),
+      limb("ch2", "2 上下文", [
+        limb("ch2-limit", "上限", [
+          twig("上下文质量决定上限", "chapter2", "上下文：决定 Agent 能力上限的关键"),
+          twig("四种角色：system / user / assistant / tool", "chapter2", "消息的四种角色")
+        ]),
+        limb("ch2-cache", "缓存", [
+          twig("缓存：前缀不改，改动越靠前作废越多", "chapter2", "KV Cache 友好的上下文设计"),
+          twig("Prompt Cache 复用同一段前缀", "chapter2", "KV Cache 与 Prompt Cache：两个层级的缓存"),
+          twig("缓存先于语义，成为架构约束", "chapter2", "缓存作为架构约束")
+        ]),
+        limb("ch2-org", "组织", [
+          twig("Skills 目录常驻，正文按需", "chapter2", "动态提示词与 Agent Skills"),
+          twig("状态栏写成可检索结论", "chapter2", "Agent 状态栏：通过元信息增强 Agent 轨迹管理"),
+          twig("压缩：装不下、不好找、提前收尾", "chapter2", "为什么需要压缩：不只是长度问题"),
+          twig("隔离优于压缩", "chapter2", "隔离优于压缩：子 Agent 上下文隔离")
+        ])
+      ], { note: "一次任务能看见什么", file: "chapter2", ch: 2, part: "构建" }),
+      limb("ch3", "3 记忆与知识库", [
+        limb("ch3-what", "记什么", [
+          twig("个人记忆和共享知识库底层相通", "chapter3", "用户记忆系统"),
+          twig("三层能力：回忆、多会话、主动服务", "chapter3", "记忆能力的评估：三层次框架"),
+          twig("存在哪里：轨迹、长期记忆、业务状态", "chapter3", "记忆的层次结构"),
+          twig("存什么：情景、语义、程序", "chapter3", "用户记忆的认知科学基础")
+        ]),
+        limb("ch3-how", "怎么用", [
+          twig("四种格式，再往上是可执行代码", "chapter3", "用户记忆的四种存储格式"),
+          twig("RAG：分块、检索、融合、重排序", "chapter3", "RAG 基础：构建 Agent 的知识获取管道"),
+          twig("智能体化 RAG 把检索变成工具", "chapter3", "智能体化 RAG：将知识检索工具化的范式转变"),
+          twig("少量事实常驻，细节按需召回", "chapter3", "RAG 技巧：上下文感知检索"),
+          twig("检索必须按调用者权限过滤", "chapter3", "用户记忆和知识库的定期整理")
+        ])
+      ], { note: "跨会话还在", file: "chapter3", ch: 3, part: "构建" }),
+      limb("ch4", "4 工具", [
+        limb("ch4-kind", "分类", [
+          twig("感知、执行、协作、沟通、事件", "chapter4", "工具的分类"),
+          twig("形态和披露是两个决定", "chapter4", "能力的表达形式：专用工具、通用执行器与 Skill")
+        ]),
+        limb("ch4-trust", "描述与风险", [
+          twig("描述写清何时不用", "chapter4", "工具描述的艺术"),
+          twig("参数不得静默改写", "chapter4", "参数传递的保真性"),
+          twig("MCP 描述本身可以是注入", "chapter4", "工具生态：MCP 与 Skill Hub")
+        ])
+      ], { note: "能读取和改变什么", file: "chapter4", ch: 4, part: "构建" }),
+      limb("ch5", "5 代码", [
+        limb("ch5-meta", "元能力", [
+          twig("测试和类型系统就是现成 Harness", "chapter5", "Harness 工程在 Coding Agent 中的实践"),
+          twig("可靠性靠检测、恢复、接管、终止", "chapter5", "故障与错误恢复"),
+          twig("思考、规则、适配、界面、自举", "chapter5", "代码：通用 Agent 的元能力")
+        ]),
+        limb("ch5-safe", "安全", [
+          twig("致命三要素，再加记忆放大器", "chapter5", "Coding Agent 的安全"),
+          twig("外部内容是数据，不是指令", "chapter5", "Coding Agent 的安全"),
+          twig("命令安全靠语义解析", "chapter5", "Coding Agent 的安全")
+        ])
+      ], { note: "能创造新工具", file: "chapter5", ch: 5, part: "构建" }),
+      limb("ch6", "6 交互", [
+        limb("ch6-when", "时机", [
+          twig("两根轴：模态、时机", "chapter6", "模态与触发时机的扩展"),
+          twig("世界可以主动推事件", "chapter6", "异步与事件驱动：当世界主动找上门"),
+          twig("快路径说话，慢路径深想", "chapter6", "认知时序：实时交互与深度思考")
+        ]),
+        limb("ch6-where", "模态", [
+          twig("语音：级联、全模态、全双工", "chapter6", "语音：最自然的人机接口"),
+          twig("屏幕动作之后要确认状态", "chapter6", "Computer Use：GUI 自动化 Agent"),
+          twig("机器人完成与否由新观察判定", "chapter6", "机器人操作：以 XLeRobot 整理桌面为例"),
+          twig("唤醒、安全点、取消、抢占、快慢分离", "chapter6", "本章小结")
+        ])
+      ], { note: "模态与时机", file: "chapter6", ch: 6, part: "构建" })
+    ], { note: "第 1–6 章，这一次能看见什么、能做什么" }),
+    limb("lift", "提升", [
+      limb("ch7", "7 评估", [
+        limb("ch7-rate", "怎样算成功", [
+          twig("Pass@k 看上限", "chapter7", "技术奇观：用 Pass@k 看能力上限"),
+          twig("Pass^k 看连续可靠性", "chapter7", "业务可靠性：关注 Pass^k")
+        ]),
+        limb("ch7-env", "怎样测", [
+          twig("环境五件：数据、状态、工具、标准、协议", "chapter7", "五个组成要素"),
+          twig("验证器从规则到 LLM 评判", "chapter7", "自动化评估方法"),
+          twig("公开基准、自建业务集、生产轨迹", "chapter7", "评估集的三个来源"),
+          twig("端到端回归，和轨迹前缀边界", "chapter7", "端到端回归任务与轨迹前缀回归任务"),
+          twig("闭环：观察、假设、实验、验证", "chapter7", "本章小结")
+        ])
+      ], { note: "怎样算变好", file: "chapter7", ch: 7, part: "提升" }),
+      limb("ch8", "8 后训练", [
+        limb("ch8-four", "四阶段", [
+          twig("都在改下一个词的概率", "chapter8", "从预训练到 RL：四阶段全景"),
+          twig("预训练：语言和世界知识", "chapter8", "预训练在做什么：预测下一个词"),
+          twig("Mid-training：在目标分布上补底座", "chapter8", "Mid-training 的本质：在目标分布上继续学习"),
+          twig("SFT 固化格式和流程", "chapter8", "SFT 的本质：换了数据的“预测下一个词”"),
+          twig("RL 抬高能得分策略的概率", "chapter8", "SFT 与 RL 的本质区别")
+        ]),
+        limb("ch8-when", "何时用", [
+          twig("pass@k 接近 0 不要上 RL", "chapter8", "什么时候需要先补底座，再做 SFT/RL"),
+          twig("底座、协议、策略分开选", "chapter8", "何时选择 Mid-training、SFT 与 RL"),
+          twig("数据和环境比算法重要", "chapter8", "本章小结")
+        ])
+      ], { note: "改的是参数", file: "chapter8", ch: 8, part: "提升" }),
+      limb("ch9", "9 持续进化", [
+        limb("ch9-loop", "闭环", [
+          twig("在线记录，离线发布", "chapter9", "构建可长期运行的持续进化闭环"),
+          twig("结果、过程、体验三层信号", "chapter9", "从运行轨迹中获得学习信号"),
+          twig("低置信度不进学习集", "chapter9", "从运行轨迹中获得学习信号")
+        ]),
+        limb("ch9-keep", "留下什么", [
+          twig("知识、指令、程序、参数", "chapter9", "Agent 持续进化的四种方法"),
+          twig("发布要过边界集和保留集", "chapter9", "可验证闭环的边界：当“完成”不等于“进步”"),
+          twig("结果可自动验证时最可靠", "chapter9", "本章小结")
+        ])
+      ], { note: "经验留在哪", file: "chapter9", ch: 9, part: "提升" }),
+      limb("ch10", "10 多 Agent", [
+        limb("ch10-when", "值不值得", [
+          twig("要有单次生成拿不到的新信息", "chapter10", "多 Agent 何时真正优于单 Agent"),
+          twig("自己审自己通常不增加信息", "chapter10", "多 Agent 何时真正优于单 Agent"),
+          twig("测试、截图、外部核验会增加信息", "chapter10", "多 Agent 何时真正优于单 Agent")
+        ]),
+        limb("ch10-how", "怎么协作", [
+          twig("上下文共享还是隔离", "chapter10", "维度一：上下文是否共享"),
+          twig("对等、管理者、去中心化", "chapter10", "维度二：协作拓扑"),
+          twig("失败：冲突、级联、趋同、扯皮、失控、理解债", "chapter10", "多 Agent 协作的失败模式"),
+          twig("人不能把理解一起外包", "chapter10", "失败模式六：理解债与认知投降")
+        ])
+      ], { note: "何时真的更强", file: "chapter10", ch: 10, part: "提升" })
+    ], { note: "第 7–10 章，怎样知道它变好了" })
+  ]
+};
+
+function branchIds(node, acc) {
+  if (!node.children || !node.children.length) return acc;
+  acc.push(node.id);
+  node.children.forEach(child => branchIds(child, acc));
+  return acc;
+}
+function nodeLink(node) {
+  if (node.heading) return sourceLink(node.file, node.heading);
+  if (node.file) return `<a class="src" href="book/${node.file}.md">原文 · 第 ${node.ch} 章</a>`;
+  return "";
+}
+function renderBranch(node, depth) {
+  const kids = node.children || [];
+  const open = kids.length > 0 && openTree.has(node.id);
+  const attrs = `data-tree="${esc(node.id)}"${node.ch ? ` data-ch="${node.ch}"` : ""}`;
+  const title = kids.length
+    ? `<button type="button" class="ktitle" ${attrs}><strong>${esc(node.title)}</strong>${node.note ? `<span>${esc(node.note)}</span>` : ""}</button>`
+    : `<div class="ktitle"><strong>${esc(node.title)}</strong></div>`;
+  const fold = kids.length
+    ? `<button type="button" class="kfold" ${attrs} aria-expanded="${open ? "true" : "false"}">${open ? "−" : kids.length}</button>`
+    : "";
+  const sub = open ? `<ul>${kids.map(child => `<li>${renderBranch(child, depth + 1)}</li>`).join("")}</ul>` : "";
+  return `<div class="kbranch d${Math.min(depth, 4)}"><div class="knode"><div class="kbody">${title}${nodeLink(node)}</div>${fold}</div>${sub}</div>`;
+}
+function renderMap() {
+  return `
+    <div class="tree-tools">
+      <button type="button" class="chip" data-tree-cmd="all">展开全部</button>
+      <button type="button" class="chip" data-tree-cmd="none">收起全部</button>
+    </div>
+    <div class="ktree">${renderBranch(TREE, 0)}</div>`;
+}
+
+function renderGraph() {
+  const lines = EDGES.map(([a, b]) => {
+    const A = nodeById(a), B = nodeById(b);
+    const on = a === selectedNode || b === selectedNode;
+    return `<line x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}" class="${on ? "on" : ""}"/>`;
+  }).join("");
+  const nodes = NODES.map(n => `
+    <g class="n ${n.core ? "core" : ""} ${n.id === selectedNode ? "on" : ""}" data-node="${n.id}">
+      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="8"/>
+      <text x="${n.x + n.w / 2}" y="${n.y + 23}" text-anchor="middle">${esc(n.label)}</text>
+    </g>`).join("");
+  const cur = nodeById(selectedNode);
+  const related = EDGES.filter(e => e.includes(selectedNode)).map(e => e[0] === selectedNode ? e[1] : e[0]);
+  return `
+    <svg class="graph" viewBox="0 0 1040 520">${lines}${nodes}</svg>
+    <div class="panel detail">
+      <div class="k">当前概念</div>
+      <h3>${esc(cur.label)}</h3>
+      <p>${esc(cur.text)}</p>
+      <p class="pit">相连：${related.map(id => esc(nodeById(id).label)).join("、")}</p>
+    </div>`;
+}
+
+function renderCards() {
+  const chips = [`<button class="chip" data-filter="0" aria-pressed="${chapterFilter === 0}">全部</button>`]
+    .concat(CHAPTERS.map(c => `<button class="chip" data-filter="${c.id}" aria-pressed="${chapterFilter === c.id}">${c.id} ${esc(c.title)}</button>`))
+    .concat(`<button class="chip" data-filter="-1" aria-pressed="${chapterFilter === -1}">后记</button>`);
+  const list = CARDS.filter(c => chapterFilter === 0 || (chapterFilter === -1 ? c[0] === 0 : c[0] === chapterFilter));
+  return `
+    <div class="chips" style="margin-bottom:14px">${chips.join("")}</div>
+    <div class="cards">${list.map(c => `
+      <article class="panel card">
+        <div class="tag">${c[0] === 0 ? "后记" : "第 " + c[0] + " 章"}</div>
+        <h3>${esc(c[1])}</h3>
+        <p>${esc(c[2])}</p>
+        <p class="remember"><strong>记住</strong>　${esc(c[3])}</p>
+        <p class="pit"><strong>易错</strong>　${esc(c[4])}</p>
+        ${sourceLink(c[5], c[6])}
+      </article>`).join("")}</div>`;
+}
+
+function renderChapters() {
+  return `<div class="panel">${CHAPTERS.map(c => `
+    <div class="acc ${c.id === openChapter ? "open" : ""}">
+      <button class="row" data-ch="${c.id}"><span><strong>${c.id}. ${esc(c.title)}</strong> · ${esc(c.line)}</span><span>${c.id === openChapter ? "收起" : "展开"}</span></button>
+      <div class="body"><ul class="clean">${c.points.map(p => `<li>${esc(p[0])} ${sourceLink(p[1], p[2])}</li>`).join("")}</ul></div>
+    </div>`).join("")}</div>
+    <p class="pit" style="margin-top:12px">更完整的树在 <a href="docs/脑图.md">docs/脑图.md</a>，卡片正文在 <a href="docs/知识卡片.md">docs/知识卡片.md</a>。</p>`;
+}
+
+function renderInterview() {
+  return `<div class="panel">${QA.map((item, i) => `
+    <div class="acc ${openQa.has(i) ? "open" : ""}">
+      <button class="row" data-qa="${i}"><span>${esc(item[1])}</span><span class="stars">${esc(item[0])}</span></button>
+      <div class="body">${esc(item[2])}${sourceLink(item[3], item[4])}</div>
+    </div>`).join("")}</div>`;
+}
+
+function treeHits(node, ancestors, q, out) {
+  const path = ancestors.concat(node);
+  const blob = [node.title, node.note || "", node.heading || "", node.part || ""].join(" ");
+  if (node.file && blob.toLowerCase().includes(q)) out.push(path);
+  (node.children || []).forEach(child => treeHits(child, path, q, out));
+  return out;
+}
+function renderSearch(q) {
+  const s = q.toLowerCase();
+  const hits = treeHits(TREE, [], s, []);
+  const cards = CARDS.filter(c => c.join(" ").toLowerCase().includes(s));
+  const qas = QA.filter(item => item.join(" ").toLowerCase().includes(s));
+  if (!hits.length && !cards.length && !qas.length) return `<div class="panel">没有匹配「${esc(q)}」。试试：缓存、Pass、Skill、护栏、RL。</div>`;
+  return `
+    <h2>知识树</h2>
+    ${hits.map(path => {
+      const node = path[path.length - 1];
+      const crumb = path.slice(0, -1).map(n => esc(n.title)).join(" / ");
+      return `<div class="result-item">${crumb ? `<div class="k">${crumb}</div>` : ""}<strong>${esc(node.title)}</strong>${node.note ? ` · ${esc(node.note)}` : ""}${nodeLink(node)}</div>`;
+    }).join("") || `<p class="pit">无</p>`}
+    <h2>卡片</h2>
+    <div class="cards">${cards.map(c => `<article class="panel card"><div class="tag">${c[0] === 0 ? "后记" : "第 " + c[0] + " 章"}</div><h3>${esc(c[1])}</h3><p>${esc(c[2])}</p><p class="remember">${esc(c[3])}</p>${sourceLink(c[5], c[6])}</article>`).join("") || `<p class="pit">无</p>`}</div>
+    <h2>面试</h2>
+    ${qas.map(item => `<div class="result-item"><div class="stars">${esc(item[0])}</div><strong>${esc(item[1])}</strong><p>${esc(item[2])}</p>${sourceLink(item[3], item[4])}</div>`).join("") || `<p class="pit">无</p>`}`;
+}
+
+function bind() {
+  document.querySelectorAll("[data-tree-cmd]").forEach(el => el.addEventListener("click", () => {
+    openTree.clear();
+    if (el.dataset.treeCmd === "all") branchIds(TREE, []).forEach(id => openTree.add(id));
+    else openTree.add("root");
+    render();
+  }));
+  document.querySelectorAll("[data-tree]").forEach(el => el.addEventListener("click", () => {
+    const id = el.dataset.tree;
+    const opening = !openTree.has(id);
+    if (opening) openTree.add(id); else openTree.delete(id);
+    if (opening && el.dataset.ch) {
+      openChapter = Number(el.dataset.ch);
+      saveChapter(openChapter);
+    }
+    render();
+  }));
+  document.querySelectorAll("[data-ch]").forEach(el => el.addEventListener("click", () => {
+    if (el.dataset.tree) return;
+    openChapter = Number(el.dataset.ch);
+    saveChapter(openChapter);
+    render();
+  }));
+  document.querySelectorAll("[data-filter]").forEach(el => el.addEventListener("click", () => {
+    chapterFilter = Number(el.dataset.filter);
+    render();
+  }));
+  document.querySelectorAll("[data-node]").forEach(el => el.addEventListener("click", () => {
+    selectedNode = el.dataset.node;
+    render();
+  }));
+  document.querySelectorAll("[data-qa]").forEach(el => el.addEventListener("click", () => {
+    const i = Number(el.dataset.qa);
+    openQa.has(i) ? openQa.delete(i) : openQa.add(i);
+    render();
+  }));
+}
+
+document.getElementById("nav").addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  view = btn.dataset.view;
+  document.getElementById("q").value = "";
+  render();
+});
+document.getElementById("q").addEventListener("input", render);
+
+let clipReady = false;
+let clips = [];
+let dbPromise = null;
+let clipChain = Promise.resolve();
+
+function idbSupported() {
+  try { return typeof indexedDB === "object" && indexedDB !== null; }
+  catch (e) { return false; }
+}
+function usableText(text) {
+  const t = String(text).replace(/\s+/g, " ").trim();
+  if (t.length < 2 || !/[\p{L}\p{N}]/u.test(t)) return "";
+  return t.length > 800 ? t.slice(0, 800) + "…" : t;
+}
+function selectionText() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return "";
+  const node = sel.anchorNode;
+  const el = node && (node.nodeType === 1 ? node : node.parentElement);
+  if (!el || !el.closest("main") || el.closest("button, input, textarea, aside")) return "";
+  return usableText(sel.toString());
+}
+function clipTime(ts) {
+  const d = new Date(ts);
+  const hm = d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  return d.toDateString() === new Date().toDateString() ? hm : (d.getMonth() + 1) + "/" + d.getDate() + " " + hm;
+}
+function paintClips() {
+  const root = document.getElementById("clips");
+  const list = document.getElementById("clip-list");
+  const status = document.getElementById("clip-status");
+  if (!clipReady) {
+    root.classList.add("hidden");
+    document.querySelector(".app").classList.remove("with-clips");
+    return;
+  }
+  root.classList.remove("hidden");
+  document.querySelector(".app").classList.add("with-clips");
+  status.textContent = clips.length ? clips.length + " 条，只保存在这台浏览器" : "点一章，或选中一段文字。";
+  list.innerHTML = clips.map(c => `
+    <article class="clip">
+      ${c.kind === "chapter"
+        ? `<button type="button" class="clip-jump" data-open-chapter="${c.chapterId}">${esc(c.title)}</button>`
+        : `<div class="k">划词 · ${esc(c.title)}</div>`}
+      <p>${esc(c.text)}</p>
+      <div class="clip-meta"><time>${esc(clipTime(c.createdAt))}</time><button type="button" class="clip-del" data-clip-del="${c.id}">删除</button></div>
+    </article>`).join("");
+  root.scrollTop = 0;
+}
+function readClips() {
+  return dbPromise.then(db => new Promise((resolve, reject) => {
+    const req = db.transaction("clips", "readonly").objectStore("clips").getAll();
+    req.onsuccess = () => resolve(req.result.sort((a, b) => b.createdAt - a.createdAt));
+    req.onerror = () => reject(req.error);
+  }));
+}
+function enqueueClip(clip) {
+  clipChain = clipChain.then(() => putClip(clip)).catch(() => {});
+}
+function putClip(clip) {
+  const existing = clips.find(c => c.kind === clip.kind && (clip.kind === "chapter" ? c.chapterId === clip.chapterId : c.text === clip.text));
+  const record = Object.assign({}, clip, { createdAt: Date.now() });
+  if (existing) record.id = existing.id;
+  return dbPromise.then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction("clips", "readwrite");
+    tx.objectStore("clips").put(record);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  })).then(readClips).then(rows => { clips = rows; paintClips(); });
+}
+function saveChapter(id) {
+  if (!clipReady) return;
+  const ch = CHAPTERS.find(c => c.id === id);
+  if (!ch) return;
+  enqueueClip({
+    kind: "chapter",
+    chapterId: ch.id,
+    title: "第 " + ch.id + " 章 · " + ch.title,
+    text: [ch.line].concat(ch.points.map(p => p[0])).join("\n"),
+    view: view
+  });
+}
+function saveText(text) {
+  if (!clipReady || !text) return;
+  enqueueClip({ kind: "text", chapterId: 0, title: VIEWS[view][0], text: text, view: view });
+}
+function removeClip(id) {
+  clipChain = clipChain.then(() => dbPromise.then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction("clips", "readwrite");
+    tx.objectStore("clips").delete(id);
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  })).then(readClips).then(rows => { clips = rows; paintClips(); })).catch(() => {});
+}
+function initClips() {
+  if (!idbSupported()) return;
+  dbPromise = new Promise((resolve, reject) => {
+    let req;
+    try { req = indexedDB.open("ai-agent-mindmap", 1); }
+    catch (e) { reject(e); return; }
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains("clips")) db.createObjectStore("clips", { keyPath: "id", autoIncrement: true });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  dbPromise.then(readClips).then(rows => {
+    clipReady = true;
+    clips = rows;
+    paintClips();
+    const hint = document.createElement("p");
+    hint.textContent = "点一章或选中正文，会记在右侧。";
+    document.querySelector(".side-note").appendChild(hint);
+  }).catch(() => { clipReady = false; paintClips(); });
+}
+document.addEventListener("mouseup", () => { const text = selectionText(); if (text) saveText(text); });
+document.addEventListener("keyup", (e) => {
+  if (e.key !== "Shift" && !e.key.startsWith("Arrow")) return;
+  const text = selectionText();
+  if (text) saveText(text);
+});
+document.addEventListener("click", (e) => {
+  const sel = window.getSelection();
+  if (!clipReady || !sel || sel.isCollapsed) return;
+  if (e.target.closest("main a")) { e.preventDefault(); e.stopPropagation(); }
+}, true);
+document.getElementById("clips").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-clip-del]");
+  if (del) { removeClip(Number(del.dataset.clipDel)); return; }
+  const open = e.target.closest("[data-open-chapter]");
+  if (!open) return;
+  openChapter = Number(open.dataset.openChapter);
+  view = "map";
+  document.getElementById("q").value = "";
+  render();
+});
+
+function inlineMd(text) {
+  const re = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|\[([^\]]+)\]\(([^)\s]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g;
+  const parts = [];
+  let last = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    parts.push(esc(text.slice(last, m.index)));
+    if (m[0].startsWith("!")) {
+      const url = /^(https?:|data:)/.test(m[2]) ? m[2] : "book/" + m[2].replace(/^\.\//, "");
+      parts.push(`<img alt="${esc(m[1])}" src="${esc(url)}">`);
+    } else if (m[4]) parts.push(`<a href="${esc(m[4])}">${esc(m[3])}</a>`);
+    else if (m[5]) parts.push(`<strong>${inlineMd(m[5])}</strong>`);
+    else if (m[6]) parts.push(`<code>${esc(m[6])}</code>`);
+    last = m.index + m[0].length;
+  }
+  parts.push(esc(text.slice(last)));
+  return parts.join("");
+}
+function renderMarkdown(md) {
+  const lines = String(md).replace(/\r\n/g, "\n").split("\n");
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+    if (line.startsWith("```")) {
+      const buf = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith("```")) buf.push(lines[i++]);
+      if (i < lines.length) i++;
+      out.push(`<pre><code>${esc(buf.join("\n"))}</code></pre>`);
+      continue;
+    }
+    const heading = /^(#{1,6})\s+(.+)$/.exec(line);
+    if (heading) {
+      const level = heading[1].length;
+      out.push(`<h${level} id="${esc(slug(heading[2]))}">${inlineMd(plainHeading(heading[2]))}</h${level}>`);
+      i++;
+      continue;
+    }
+    if (line.startsWith("|") && i + 1 < lines.length && /^\|?\s*:?-{3,}/.test(lines[i + 1])) {
+      const rows = [];
+      while (i < lines.length && lines[i].startsWith("|")) rows.push(lines[i++]);
+      const cells = (row) => row.replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim());
+      const head = cells(rows[0]);
+      const body = rows.slice(2).map(cells);
+      out.push(`<table><thead><tr>${head.map(cell => `<th>${inlineMd(cell)}</th>`).join("")}</tr></thead><tbody>${body.map(row => `<tr>${row.map(cell => `<td>${inlineMd(cell)}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+      continue;
+    }
+    if (line.startsWith(">")) {
+      const buf = [];
+      while (i < lines.length && lines[i].startsWith(">")) buf.push(lines[i++].replace(/^>\s?/, ""));
+      out.push(`<blockquote>${renderMarkdown(buf.join("\n"))}</blockquote>`);
+      continue;
+    }
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) items.push(lines[i++].replace(/^\s*[-*]\s+/, ""));
+      out.push(`<ul>${items.map(item => `<li>${inlineMd(item)}</li>`).join("")}</ul>`);
+      continue;
+    }
+    if (/^\s*\d+\.\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) items.push(lines[i++].replace(/^\s*\d+\.\s+/, ""));
+      out.push(`<ol>${items.map(item => `<li>${inlineMd(item)}</li>`).join("")}</ol>`);
+      continue;
+    }
+    if (/^---+$/.test(line.trim())) { out.push("<hr>"); i++; continue; }
+    const buf = [line];
+    i++;
+    while (i < lines.length && lines[i].trim() && !/^(#{1,6}\s|```|\||>|\s*[-*]\s+|\s*\d+\.\s+)/.test(lines[i]) && !/^---+$/.test(lines[i].trim())) buf.push(lines[i++]);
+    out.push(`<p>${inlineMd(buf.join(" "))}</p>`);
+  }
+  return out.join("\n");
+}
+const previewHtml = new Map();
+let bookLoader = null;
+function ensureBook() {
+  if (window.BOOK) return Promise.resolve();
+  if (!bookLoader) {
+    bookLoader = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "preview/book.js";
+      script.onload = () => window.BOOK ? resolve() : reject(new Error("empty"));
+      script.onerror = () => reject(new Error("load"));
+      document.body.appendChild(script);
+    });
+  }
+  return bookLoader;
+}
+function closePreview() {
+  document.getElementById("preview").classList.add("hidden");
+}
+function openPreview(file, id) {
+  const root = document.getElementById("preview");
+  const body = document.getElementById("preview-body");
+  const note = document.getElementById("preview-note");
+  root.classList.remove("hidden");
+  document.getElementById("preview-title").textContent = "原文";
+  note.textContent = "正在打开原文…";
+  body.innerHTML = "";
+  ensureBook().then(() => {
+    const md = window.BOOK[file];
+    if (!md) { note.textContent = "没有找到这一章。"; return; }
+    if (!previewHtml.has(file)) previewHtml.set(file, renderMarkdown(md));
+    body.innerHTML = previewHtml.get(file);
+    const heading = id ? body.querySelector("#" + CSS.escape(id)) : body.querySelector("h1, h2, h3");
+    note.textContent = "";
+    if (!heading) { note.textContent = "没有对上这一节，已从章首打开。"; return; }
+    document.getElementById("preview-title").textContent = heading.textContent;
+    heading.classList.add("hit");
+    heading.scrollIntoView({ block: "start" });
+  }).catch(() => { note.textContent = "原文没有载入。请确认 preview/book.js 和本页在同一目录下打开。"; });
+}
+document.getElementById("preview-close").addEventListener("click", closePreview);
+document.getElementById("preview").addEventListener("click", (e) => { if (e.target.id === "preview") closePreview(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closePreview(); });
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("a[href]");
+  if (!link) return;
+  const match = (link.getAttribute("href") || "").match(/^book\/([A-Za-z0-9_-]+)\.md(?:#(.*))?$/);
+  if (!match) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openPreview(match[1], match[2] ? decodeURIComponent(match[2]) : "");
+}, true);
+
+render();
+initClips();
+</script>
+</body>
+</html>
