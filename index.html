@@ -171,8 +171,17 @@ a.src { margin-top: 10px; }
   svg.graph .n.core rect { fill: #1c1915; stroke: #1c1915; }
   svg.graph .n.core text { fill: #f6f1e7; }
   svg.graph .n.on rect { fill: #f3e4d8; stroke: #9a3412; }
-  svg.graph line { stroke: #c3b9a6; }
-  svg.graph line.on { stroke: #9a3412; stroke-width: 2; }
+  svg.graph line.base { stroke: #c3b9a6; stroke-linecap: round; }
+  svg.graph line.flow {
+    stroke: #c2410c; stroke-width: 2; stroke-linecap: round;
+    stroke-dasharray: 8 16; animation: flow 1.6s linear infinite;
+  }
+  svg.graph line.base.on { stroke: #9a3412; stroke-width: 2.5; }
+  svg.graph line.flow.on { stroke: #9a3412; stroke-width: 2.5; opacity: 1; }
+  @keyframes flow { to { stroke-dashoffset: -48; } }
+  @media (prefers-reduced-motion: reduce) {
+    svg.graph line.flow { animation: none; }
+  }
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
   .card h3 { font-family: var(--serif); font-size: 18px; font-weight: 500; }
   .tag { font-size: 12px; color: var(--accent); }
@@ -188,23 +197,52 @@ a.src { margin-top: 10px; }
   .stars { color: var(--gold); letter-spacing: 0.05em; font-size: 12px; }
   .hidden { display: none !important; }
   .result-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .app.with-clips { grid-template-columns: 220px minmax(0, 1fr) 280px; }
+  .app.with-clips { grid-template-columns: 220px minmax(0, 1fr) 300px; }
+  .app.with-clips.clips-collapsed { grid-template-columns: 220px minmax(0, 1fr) 44px; }
   .clips {
     position: sticky; top: 0; height: 100vh; overflow: auto;
-    padding: 28px 16px 32px; border-left: 1px solid var(--line);
+    padding: 20px 14px 32px; border-left: 1px solid var(--line);
     background: #efeae0; display: flex; flex-direction: column; gap: 12px;
   }
+  .clip-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .clips h2 { margin: 0; font-size: 20px; }
+  .clip-toggle { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 2px 10px; font-size: 12px; color: var(--muted); }
+  .clips.collapsed { padding: 16px 4px; align-items: center; overflow: hidden; }
+  .clips.collapsed .clip-body { display: none; }
+  .clips.collapsed .clip-head { flex-direction: column; }
+  .clips.collapsed h2 { writing-mode: vertical-rl; letter-spacing: 0.14em; font-size: 14px; }
+  .clips.collapsed .clip-toggle { padding: 8px 4px; writing-mode: vertical-rl; letter-spacing: 0.12em; }
   .clip-empty { margin: 0; color: var(--muted); font-size: 13px; }
   .clip-list { display: flex; flex-direction: column; gap: 8px; }
   .clip { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-  .clip p { margin: 4px 0 0; font-size: 13px; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+  .clip-quote { margin: 6px 0 0; padding-left: 8px; border-left: 3px solid var(--gold); font-size: 13px; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  .clip-comment { margin-top: 8px; background: #f6f1e7; border-radius: 8px; padding: 6px 8px; }
+  .clip-comment p { margin: 0; font-size: 13px; white-space: pre-wrap; }
+  .clip-comment time { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+  .clip-add { display: flex; gap: 6px; margin-top: 8px; }
+  .clip-add input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); padding: 4px 8px; }
+  .clip-add button, .clip-send, .clip-cancel { border: 0; border-radius: 8px; padding: 4px 10px; }
+  .clip-send { background: var(--ink); color: var(--bg); }
+  .clip-cancel, .clip-add button { background: transparent; color: var(--muted); }
   .clip-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; color: var(--muted); font-size: 12px; }
   .clip-jump { display: block; width: 100%; text-align: left; background: transparent; border: 0; padding: 0; font-weight: 600; }
   .clip-del { border: 0; background: transparent; color: var(--muted); padding: 0; }
+  .clip-pop {
+    position: fixed; z-index: 45; border: 0; border-radius: 8px;
+    background: var(--ink); color: #f6f1e7; padding: 6px 12px; box-shadow: 0 6px 16px rgba(28, 25, 21, .18);
+  }
+  .clip-composer {
+    position: fixed; z-index: 46; width: 280px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+    box-shadow: 0 10px 28px rgba(28, 25, 21, .16);
+  }
+  .clip-composer p { margin: 0 0 8px; padding-left: 8px; border-left: 3px solid var(--gold); font-size: 13px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .clip-composer textarea { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; resize: vertical; background: var(--bg); }
+  .clip-composer .row { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
   @media (max-width: 960px) {
-    .app, .app.with-clips { grid-template-columns: 1fr; }
+    .app, .app.with-clips, .app.with-clips.clips-collapsed { grid-template-columns: 1fr; }
     aside, .clips { position: relative; height: auto; border-right: 0; border-left: 0; border-bottom: 1px solid var(--line); }
+    .clips.collapsed h2, .clips.collapsed .clip-toggle { writing-mode: horizontal-tb; letter-spacing: 0; font-size: 16px; }
     nav { flex-direction: row; flex-wrap: wrap; }
     main { padding: 20px 16px 48px; }
     header.top, .formula, .grid-2, .grid-3, .map-wrap { grid-template-columns: 1fr; display: grid; }
@@ -238,10 +276,24 @@ a.src { margin-top: 10px; }
     <section id="view"></section>
   </main>
   <aside id="clips" class="clips hidden" aria-label="划词记录">
-    <h2>划词记录</h2>
-    <p class="clip-empty" id="clip-status">点一章，或选中一段文字。</p>
-    <div class="clip-list" id="clip-list"></div>
+    <div class="clip-head">
+      <h2>划词</h2>
+      <button type="button" class="clip-toggle" id="clip-toggle" aria-expanded="true">收起</button>
+    </div>
+    <div class="clip-body">
+      <p class="clip-empty" id="clip-status">选中文字后点「评论」。</p>
+      <div class="clip-list" id="clip-list"></div>
+    </div>
   </aside>
+</div>
+<button type="button" id="clip-pop" class="clip-pop hidden">评论</button>
+<div id="clip-composer" class="clip-composer hidden">
+  <p id="clip-quote"></p>
+  <textarea id="clip-input" rows="3" placeholder="写下评论"></textarea>
+  <div class="row">
+    <button type="button" class="clip-cancel" id="clip-cancel">取消</button>
+    <button type="button" class="clip-send" id="clip-send">发送</button>
+  </div>
 </div>
 <div id="preview" class="preview hidden">
   <div class="preview-panel" role="dialog" aria-modal="true" aria-labelledby="preview-title">
@@ -719,7 +771,8 @@ function renderGraph() {
   const lines = EDGES.map(([a, b]) => {
     const A = nodeById(a), B = nodeById(b);
     const on = a === selectedNode || b === selectedNode;
-    return `<line x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}" class="${on ? "on" : ""}"/>`;
+    const cls = on ? " on" : "";
+    return `<line class="base${cls}" x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}"/><line class="flow${cls}" x1="${A.x + A.w / 2}" y1="${A.y + A.h / 2}" x2="${B.x + B.w / 2}" y2="${B.y + B.h / 2}"/>`;
   }).join("");
   const nodes = NODES.map(n => `
     <g class="n ${n.core ? "core" : ""} ${n.id === selectedNode ? "on" : ""}" data-node="${n.id}">
@@ -865,13 +918,34 @@ function selectionText() {
   if (!sel || sel.isCollapsed || !sel.rangeCount) return "";
   const node = sel.anchorNode;
   const el = node && (node.nodeType === 1 ? node : node.parentElement);
-  if (!el || !el.closest("main") || el.closest("button, input, textarea, aside")) return "";
+  if (!el || !el.closest("main, #preview-body")) return "";
+  if (el.closest("button, input, textarea, #clips, .clip-pop, .clip-composer")) return "";
   return usableText(sel.toString());
+}
+function selectionTitle() {
+  const node = window.getSelection().anchorNode;
+  const el = node && (node.nodeType === 1 ? node : node.parentElement);
+  if (el && el.closest("#preview-body")) return "原文 · " + document.getElementById("preview-title").textContent;
+  return VIEWS[view][0];
 }
 function clipTime(ts) {
   const d = new Date(ts);
   const hm = d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
   return d.toDateString() === new Date().toDateString() ? hm : (d.getMonth() + 1) + "/" + d.getDate() + " " + hm;
+}
+let clipsOpen = true;
+try { clipsOpen = localStorage.getItem("agent-mindmap-clips-open") !== "0"; } catch (e) {}
+let pendingQuote = "";
+let pendingTitle = "";
+let composerOpen = false;
+
+function applyClipLayout() {
+  const root = document.getElementById("clips");
+  document.querySelector(".app").classList.toggle("clips-collapsed", clipReady && !clipsOpen);
+  root.classList.toggle("collapsed", !clipsOpen);
+  const toggle = document.getElementById("clip-toggle");
+  toggle.textContent = clipsOpen ? "收起" : "展开";
+  toggle.setAttribute("aria-expanded", clipsOpen ? "true" : "false");
 }
 function paintClips() {
   const root = document.getElementById("clips");
@@ -879,26 +953,34 @@ function paintClips() {
   const status = document.getElementById("clip-status");
   if (!clipReady) {
     root.classList.add("hidden");
-    document.querySelector(".app").classList.remove("with-clips");
+    document.querySelector(".app").classList.remove("with-clips", "clips-collapsed");
     return;
   }
   root.classList.remove("hidden");
   document.querySelector(".app").classList.add("with-clips");
-  status.textContent = clips.length ? clips.length + " 条，只保存在这台浏览器" : "点一章，或选中一段文字。";
-  list.innerHTML = clips.map(c => `
+  applyClipLayout();
+  status.textContent = clips.length ? clips.length + " 条，只保存在这台浏览器" : "选中文字后点「评论」。";
+  list.innerHTML = clips.map(c => {
+    const comments = c.comments || [];
+    return `
     <article class="clip">
       ${c.kind === "chapter"
         ? `<button type="button" class="clip-jump" data-open-chapter="${c.chapterId}">${esc(c.title)}</button>`
         : `<div class="k">划词 · ${esc(c.title)}</div>`}
-      <p>${esc(c.text)}</p>
-      <div class="clip-meta"><time>${esc(clipTime(c.createdAt))}</time><button type="button" class="clip-del" data-clip-del="${c.id}">删除</button></div>
-    </article>`).join("");
-  root.scrollTop = 0;
+      <p class="clip-quote">${esc(c.text)}</p>
+      ${comments.map(item => `<div class="clip-comment"><p>${esc(item.text)}</p><time>${esc(clipTime(item.createdAt))}</time></div>`).join("")}
+      <div class="clip-add">
+        <input data-comment-for="${c.id}" placeholder="添加评论" />
+        <button type="button" data-comment-send="${c.id}">发送</button>
+      </div>
+      <div class="clip-meta"><time>${esc(clipTime(c.updatedAt || c.createdAt))}</time><button type="button" class="clip-del" data-clip-del="${c.id}">删除</button></div>
+    </article>`;
+  }).join("");
 }
 function readClips() {
   return dbPromise.then(db => new Promise((resolve, reject) => {
     const req = db.transaction("clips", "readonly").objectStore("clips").getAll();
-    req.onsuccess = () => resolve(req.result.sort((a, b) => b.createdAt - a.createdAt));
+    req.onsuccess = () => resolve(req.result.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt)));
     req.onerror = () => reject(req.error);
   }));
 }
@@ -906,9 +988,13 @@ function enqueueClip(clip) {
   clipChain = clipChain.then(() => putClip(clip)).catch(() => {});
 }
 function putClip(clip) {
-  const existing = clips.find(c => c.kind === clip.kind && (clip.kind === "chapter" ? c.chapterId === clip.chapterId : c.text === clip.text));
-  const record = Object.assign({}, clip, { createdAt: Date.now() });
+  const existing = clips.find(c => clip.id ? c.id === clip.id : c.kind === clip.kind && (clip.kind === "chapter" ? c.chapterId === clip.chapterId : c.text === clip.text));
+  const record = Object.assign({ comments: [] }, existing || {}, clip);
   if (existing) record.id = existing.id;
+  if (!clip.comments) record.comments = (existing && existing.comments) || [];
+  const now = Date.now();
+  if (!record.createdAt) record.createdAt = now;
+  record.updatedAt = now;
   return dbPromise.then(db => new Promise((resolve, reject) => {
     const tx = db.transaction("clips", "readwrite");
     tx.objectStore("clips").put(record);
@@ -928,9 +1014,35 @@ function saveChapter(id) {
     view: view
   });
 }
-function saveText(text) {
-  if (!clipReady || !text) return;
-  enqueueClip({ kind: "text", chapterId: 0, title: VIEWS[view][0], text: text, view: view });
+function saveTextComment(text, comment, title) {
+  const note = String(comment || "").trim();
+  if (!clipReady || !text || !note) return;
+  clipsOpen = true;
+  try { localStorage.setItem("agent-mindmap-clips-open", "1"); } catch (e) {}
+  const item = { text: note, createdAt: Date.now() };
+  const existing = clips.find(c => c.kind === "text" && c.text === text);
+  if (existing) {
+    enqueueClip({ id: existing.id, kind: "text", comments: (existing.comments || []).concat(item) });
+    return;
+  }
+  enqueueClip({
+    kind: "text",
+    chapterId: 0,
+    title: title || VIEWS[view][0],
+    text: text,
+    view: view,
+    comments: [item]
+  });
+}
+function addClipComment(id, comment) {
+  const note = String(comment || "").trim();
+  const existing = clips.find(c => c.id === id);
+  if (!existing || !note) return;
+  enqueueClip({
+    id: existing.id,
+    kind: existing.kind,
+    comments: (existing.comments || []).concat({ text: note, createdAt: Date.now() })
+  });
 }
 function removeClip(id) {
   clipChain = clipChain.then(() => dbPromise.then(db => new Promise((resolve, reject) => {
@@ -958,24 +1070,86 @@ function initClips() {
     clips = rows;
     paintClips();
     const hint = document.createElement("p");
-    hint.textContent = "点一章或选中正文，会记在右侧。";
+    hint.textContent = "选中正文后点「评论」，会记在右侧。";
     document.querySelector(".side-note").appendChild(hint);
   }).catch(() => { clipReady = false; paintClips(); });
 }
-document.addEventListener("mouseup", () => { const text = selectionText(); if (text) saveText(text); });
+function hideClipPop() {
+  document.getElementById("clip-pop").classList.add("hidden");
+}
+function hideComposer() {
+  composerOpen = false;
+  document.getElementById("clip-composer").classList.add("hidden");
+  document.getElementById("clip-input").value = "";
+}
+function placeClipPop() {
+  if (!clipReady || composerOpen) return;
+  const text = selectionText();
+  const pop = document.getElementById("clip-pop");
+  if (!text) { hideClipPop(); return; }
+  const rect = window.getSelection().getRangeAt(0).getBoundingClientRect();
+  if (!rect.width && !rect.height) { hideClipPop(); return; }
+  pendingQuote = text;
+  pendingTitle = selectionTitle();
+  pop.classList.remove("hidden");
+  pop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 72)) + "px";
+  pop.style.top = Math.max(8, rect.top - 38) + "px";
+}
+function openComposer() {
+  if (!pendingQuote) return;
+  composerOpen = true;
+  hideClipPop();
+  const box = document.getElementById("clip-composer");
+  const pop = document.getElementById("clip-pop");
+  box.classList.remove("hidden");
+  const left = Math.max(8, Math.min(parseFloat(pop.style.left) || 8, window.innerWidth - 296));
+  box.style.left = left + "px";
+  box.style.top = pop.style.top;
+  document.getElementById("clip-quote").textContent = pendingQuote;
+  const input = document.getElementById("clip-input");
+  input.value = "";
+  input.focus();
+}
+document.getElementById("clip-pop").addEventListener("mousedown", (e) => e.preventDefault());
+document.getElementById("clip-pop").addEventListener("click", openComposer);
+document.getElementById("clip-cancel").addEventListener("click", hideComposer);
+document.getElementById("clip-send").addEventListener("click", () => {
+  saveTextComment(pendingQuote, document.getElementById("clip-input").value, pendingTitle);
+  hideComposer();
+  window.getSelection().removeAllRanges();
+});
+document.getElementById("clip-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) document.getElementById("clip-send").click();
+  if (e.key === "Escape") hideComposer();
+});
+document.getElementById("clip-toggle").addEventListener("click", () => {
+  clipsOpen = !clipsOpen;
+  try { localStorage.setItem("agent-mindmap-clips-open", clipsOpen ? "1" : "0"); } catch (e) {}
+  applyClipLayout();
+});
+document.addEventListener("mouseup", (e) => {
+  if (e.target.closest && e.target.closest("#clip-pop, #clip-composer")) return;
+  placeClipPop();
+});
 document.addEventListener("keyup", (e) => {
   if (e.key !== "Shift" && !e.key.startsWith("Arrow")) return;
-  const text = selectionText();
-  if (text) saveText(text);
+  placeClipPop();
 });
 document.addEventListener("click", (e) => {
   const sel = window.getSelection();
   if (!clipReady || !sel || sel.isCollapsed) return;
-  if (e.target.closest("main a")) { e.preventDefault(); e.stopPropagation(); }
+  if (e.target.closest("main a, #preview-body a")) { e.preventDefault(); e.stopPropagation(); }
 }, true);
 document.getElementById("clips").addEventListener("click", (e) => {
   const del = e.target.closest("[data-clip-del]");
   if (del) { removeClip(Number(del.dataset.clipDel)); return; }
+  const send = e.target.closest("[data-comment-send]");
+  if (send) {
+    const id = Number(send.dataset.commentSend);
+    const input = document.querySelector(`[data-comment-for="${id}"]`);
+    addClipComment(id, input && input.value);
+    return;
+  }
   const open = e.target.closest("[data-open-chapter]");
   if (!open) return;
   openChapter = Number(open.dataset.openChapter);
