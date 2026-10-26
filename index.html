@@ -183,8 +183,8 @@
   .kbranch > ul > li:first-child::before { top: 50%; }
   .kbranch > ul > li:last-child::before { bottom: 50%; }
   .preview { position: fixed; inset: 0; z-index: 40; background: rgba(28, 25, 21, .35); display: flex; justify-content: flex-end; }
-  .preview-panel { width: min(760px, 100%); height: 100%; overflow: auto; background: var(--bg); padding: 18px 28px 72px; box-shadow: -8px 0 24px rgba(28, 25, 21, .12); }
-  .preview-bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg); padding: 6px 0 12px; }
+  .preview-panel { width: min(760px, 100%); height: 100%; overflow: auto; background: var(--bg); padding: 0 28px 72px; box-shadow: -8px 0 24px rgba(28, 25, 21, .12); }
+  .preview-bar { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg); padding: 24px 0 12px; }
   .preview-bar strong { font-family: var(--serif); font-size: calc(20px * var(--fs)); font-weight: 500; }
   .preview-close { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 4px 12px; }
   .preview-body { font-size: calc(15px * var(--fs)); }
@@ -339,7 +339,8 @@ a.src { margin-top: 10px; }
     svg.graph { min-width: 560px; }
     details.later { padding: 12px 14px; }
     details.later table { display: block; overflow-x: auto; }
-    .preview-panel { padding: 12px 16px 56px; }
+    .preview-panel { padding: 0 16px 56px; }
+    .preview-bar { padding-top: 14px; }
     .clip-composer { width: calc(100vw - 16px); }
     .knode { max-width: 230px; }
   }
@@ -1468,6 +1469,7 @@ function renderMarkdown(md) {
   return out.join("\n");
 }
 const previewHtml = new Map();
+const chapterMd = new Map();
 let bookLoader = null;
 function ensureBook() {
   if (window.BOOK) return Promise.resolve();
@@ -1475,12 +1477,26 @@ function ensureBook() {
     bookLoader = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = "preview/book.js";
-      script.onload = () => window.BOOK ? resolve() : reject(new Error("empty"));
-      script.onerror = () => reject(new Error("load"));
+      script.onload = () => window.BOOK ? resolve() : reject(new Error("book.js 是空的"));
+      script.onerror = () => { script.remove(); reject(new Error("book.js 没下载下来")); };
       document.body.appendChild(script);
-    });
+    }).catch(err => { bookLoader = null; throw err; });
   }
   return bookLoader;
+}
+function fetchChapter(file) {
+  if (location.protocol === "file:" || typeof fetch !== "function") return Promise.reject(new Error("file"));
+  return fetch("book/" + file + ".md").then(res => {
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.text();
+  });
+}
+function loadChapter(file) {
+  if (window.BOOK && window.BOOK[file]) return Promise.resolve(window.BOOK[file]);
+  if (chapterMd.has(file)) return Promise.resolve(chapterMd.get(file));
+  return fetchChapter(file)
+    .catch(() => ensureBook().then(() => window.BOOK[file]))
+    .then(md => { if (md) chapterMd.set(file, md); return md; });
 }
 function closePreview() {
   document.getElementById("preview").classList.add("hidden");
@@ -1493,8 +1509,7 @@ function openPreview(file, id) {
   document.getElementById("preview-title").textContent = "原文";
   note.textContent = "正在打开原文…";
   body.innerHTML = "";
-  ensureBook().then(() => {
-    const md = window.BOOK[file];
+  loadChapter(file).then(md => {
     if (!md) { note.textContent = "没有找到这一章。"; return; }
     if (!previewHtml.has(file)) previewHtml.set(file, renderMarkdown(md));
     body.innerHTML = previewHtml.get(file);
@@ -1504,7 +1519,11 @@ function openPreview(file, id) {
     document.getElementById("preview-title").textContent = heading.textContent;
     heading.classList.add("hit");
     heading.scrollIntoView({ block: "start" });
-  }).catch(() => { note.textContent = "原文没有载入。请确认 preview/book.js 和本页在同一目录下打开。"; });
+  }).catch(err => {
+    note.textContent = location.protocol === "file:"
+      ? "原文没有载入。请确认 preview/book.js 和本页在同一目录下打开。"
+      : "原文没有载入（" + (err && err.message || "网络错误") + "）。网络不稳时可以关掉再点一次。";
+  });
 }
 document.getElementById("preview-close").addEventListener("click", closePreview);
 document.getElementById("preview").addEventListener("click", (e) => { if (e.target.id === "preview") closePreview(); });
